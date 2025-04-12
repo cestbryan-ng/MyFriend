@@ -1,0 +1,52 @@
+#anchorpane1 {
+    -fx-background-color : #1b1919;
+}
+
+#hbox1 {
+    -fx-background-color : #1b1919;
+    -fx-border-color : #1b1919;
+    -fx-border-width : 10;
+}
+
+.text-field {
+    -fx-background-color : black;
+    -fx-text-fill : white;
+    -fx-font-family : "Cambria Math"
+}
+
+.label {
+    -fx-background-color :#1b1919;
+    -fx-font-weight: bold;
+    -fx-font-size : 15;
+    -fx-text-fill : white;
+}
+
+#message_erreur {
+    -fx-text-fill : red;
+    -fx-font-size : 10;
+}
+
+.button {
+    -fx-background-color : black;
+    -fx-text-fill : white;
+    -fx-font-weight: bold;
+    -fx-font-size : 13;
+    -fx-border-color : white;
+    -fx-border-width : 0 0 1 0;
+    -fx-border-radius : 5;
+    -fx-background-radius : 10;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-border-width : 0;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.button:pressed {
+    -fx-border-width : 0;
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+}
+

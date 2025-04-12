@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="anchorpane1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="250.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxtest.testjavafx.MainPage1Controller">
+    <children>
+        <VBox layoutY="15.0" prefHeight="200.0" prefWidth="600.0">
+            <children>
+                <Label text="Authentification">
+                    <VBox.margin>
+                        <Insets left="50.0" />
+                    </VBox.margin>
+                </Label>
+                <HBox fx:id="hbox1" prefHeight="200.0" prefWidth="600.0">
+                    <children>
+                        <ImageView fitHeight="180.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@images/—Pngtree—wifi%20vector%20icon_4236405.png" />
+                            </image>
+                            <HBox.margin>
+                                <Insets left="10.0" right="10.0" top="-10.0" />
+                            </HBox.margin>
+                            <effect>
+                                <DropShadow height="22.46" radius="10.365">
+                                    <color>
+                                        <Color red="0.1111111119389534" green="0.48148149251937866" blue="1.0" />
+                                    </color>
+                                </DropShadow>
+                            </effect>
+                        </ImageView>
+                        <VBox prefHeight="206.0" prefWidth="355.0">
+                            <children>
+                                <HBox prefHeight="98.0" prefWidth="343.0">
+                                    <children>
+                                        <Label text="Nom  utilisateur">
+                                            <HBox.margin>
+                                                <Insets left="55.0" right="15.0" top="20.0" />
+                                            </HBox.margin>
+                                            <font>
+                                                <Font name="Cambria Math" size="13.0" />
+                                            </font>
+                                        </Label>
+                                        <TextField fx:id="nom_utilisateur">
+                                            <HBox.margin>
+                                                <Insets top="17.0" />
+                                            </HBox.margin>
+                                        </TextField>
+                                    </children>
+                                </HBox>
+                                <HBox prefHeight="101.0" prefWidth="343.0">
+                                    <children>
+                                        <Label text="Mot de passe">
+                                            <font>
+                                                <Font name="Cambria Math" size="13.0" />
+                                            </font>
+                                            <HBox.margin>
+                                                <Insets left="80.0" right="10.0" top="20.0" />
+                                            </HBox.margin>
+                                        </Label>
+                                        <PasswordField fx:id="mot_de_passe_utilisateur1">
+                                            <HBox.margin>
+                                                <Insets top="17.0" />
+                                            </HBox.margin>
+                                        </PasswordField>
+                                    </children>
+                                </HBox>
+                        <HBox prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <Label text="Confirmer mot de passe">
+                                 <HBox.margin>
+                                    <Insets right="15.0" top="20.0" />
+                                 </HBox.margin>
+                              </Label>
+                              <PasswordField fx:id="mot_de_passe_utilisateur2">
+                                 <HBox.margin>
+                                    <Insets top="17.0" />
+                                 </HBox.margin>
+                              </PasswordField>
+                           </children>
+                        </HBox>
+                                <HBox prefHeight="100.0" prefWidth="200.0">
+                                    <children>
+                                        <Button mnemonicParsing="false" onAction="#Inscrire" text="S'inscrire">
+                                            <font>
+                                                <Font name="Cambria Math" size="13.0" />
+                                            </font>
+                                            <HBox.margin>
+                                                <Insets left="130.0" right="10.0" top="15.0" />
+                                            </HBox.margin>
+                                        </Button>
+                              <Button mnemonicParsing="false" onAction="#Retour" text="Retour">
+                                 <font>
+                                    <Font name="Cambria Math" size="13.0" />
+                                 </font>
+                                 <HBox.margin>
+                                    <Insets top="15.0" />
+                                 </HBox.margin>
+                              </Button>
+                                        <Label fx:id="message_erreur">
+                                            <HBox.margin>
+                                                <Insets left="-100.0" top="50.0" />
+                                            </HBox.margin>
+                                        </Label>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

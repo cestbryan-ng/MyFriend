@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="anchorpane1" prefHeight="600.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxtest.testjavafx.Page1Controller">
+   <children>
+      <Pane fx:id="pane1" prefHeight="600.0" prefWidth="68.0">
+         <children>
+            <Line endX="100.0" fill="WHITE" layoutX="-50.0" layoutY="35.0" startX="67.5" stroke="WHITE" strokeWidth="2.0" />
+            <Line endX="100.0" fill="WHITE" layoutX="-50.0" layoutY="41.0" startX="67.5" stroke="WHITE" strokeWidth="2.0" />
+            <Line endX="100.0" fill="WHITE" layoutX="-50.0" layoutY="47.0" startX="67.5" stroke="WHITE" strokeWidth="2.0" />
+            <Button fx:id="button_exit" layoutX="2.0" layoutY="487.0" mnemonicParsing="false" onAction="#Fermer" prefHeight="99.0" prefWidth="50.0">
+               <graphic>
+                  <ImageView fitHeight="50.0" fitWidth="47.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@images/illustration-porte-sortie.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </Button>
+         </children>
+      </Pane>
+      <Pane fx:id="pane2" layoutX="68.0" prefHeight="600.0" prefWidth="200.0">
+         <children>
+            <TextField fx:id="recherche_conversation" layoutX="24.0" layoutY="22.0" prefHeight="29.0" prefWidth="123.0" promptText="Rechercher...">
+               <font>
+                  <Font name="Cambria Math" size="12.0" />
+               </font>
+            </TextField>
+            <Line endX="100.0" layoutX="100.0" layoutY="65.0" startX="-100.0" stroke="WHITE" strokeWidth="0.5" />
+            <ScrollPane fx:id="scrollpane1" layoutY="66.0" prefHeight="534.0" prefWidth="200.0">
+               <content>
+                  <VBox fx:id="vbox1" prefHeight="727.0" prefWidth="183.0">
+                     <children>
+                        <Button fx:id="button_test1" graphicTextGap="20.0" mnemonicParsing="false" onAction="#Charger" prefHeight="47.0" prefWidth="191.0" text="toto">
+                           <graphic>
+                              <ImageView fitHeight="47.0" fitWidth="36.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@images/cercle0.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                        </Button>
+                        <Button fx:id="button_test2" graphicTextGap="20.0" mnemonicParsing="false" prefHeight="47.0" prefWidth="191.0" text="tata">
+                           <graphic>
+                              <ImageView fitHeight="47.0" fitWidth="36.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@images/cercle1.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                        </Button>
+                     </children>
+                  </VBox>
+               </content>
+            </ScrollPane>
+            <Button fx:id="button_rechercher" layoutX="147.0" layoutY="23.0" mnemonicParsing="false" onAction="#Rechercher">
+               <graphic>
+                  <ImageView fitHeight="19.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@images/loupe.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </Button>
+         </children>
+      </Pane>
+      <Pane fx:id="pane3" layoutX="268.0" prefHeight="600.0" prefWidth="683.0">
+         <children>
+            <HBox fx:id="hbox1" prefHeight="66.0" prefWidth="683.0">
+               <children>
+                  <Label fx:id="nom_utilisateur" text="Nom utilisateur">
+                     <HBox.margin>
+                        <Insets left="20.0" right="5.0" top="25.0" />
+                     </HBox.margin>
+                  </Label>
+                  <ImageView fx:id="profil_enligne" fitHeight="22.0" fitWidth="11.0" pickOnBounds="true" preserveRatio="true">
+                     <HBox.margin>
+                        <Insets right="460.0" top="28.0" />
+                     </HBox.margin>
+                     <image>
+                        <Image url="@images/rondrouge.png" />
+                     </image>
+                  </ImageView>
+                  <Button fx:id="button_appel" mnemonicParsing="false" onAction="#Appel">
+                     <graphic>
+                        <ImageView fx:id="button_appel" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/appel-telephonique.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <HBox.margin>
+                        <Insets top="15.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="button_video" mnemonicParsing="false" onAction="#Video">
+                     <graphic>
+                        <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/lecteur-video.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <HBox.margin>
+                        <Insets top="15.0" />
+                     </HBox.margin>
+                  </Button>
+               </children>
+            </HBox>
+            <ScrollPane fx:id="scrollpane2" layoutY="66.0" prefHeight="479.0" prefWidth="683.0">
+               <content>
+                  <VBox fx:id="vbox2" prefHeight="689.0" prefWidth="666.0">
+                     <children>
+                        <HBox prefHeight="47.0" prefWidth="0.0">
+                           <children>
+                              <Label fx:id="message_a_envoyer" alignment="BASELINE_LEFT" nodeOrientation="LEFT_TO_RIGHT" prefHeight="25.0" text="Message envoyée :  Je suis ton pere fdfdsd sdsds dsds" textOverrun="CLIP" HBox.hgrow="ALWAYS">
+                                 <HBox.margin>
+                                    <Insets left="10.0" top="10.0" />
+                                 </HBox.margin>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox prefHeight="47.0" prefWidth="666.0">
+                           <children>
+                              <Label fx:id="message_recue" alignment="BASELINE_LEFT" nodeOrientation="LEFT_TO_RIGHT" prefHeight="25.0" text="Message recue :  Je suis ton pere fdfdsd sdsds dsds" textOverrun="CLIP">
+                                 <HBox.margin>
+                                    <Insets left="10.0" top="10.0" />
+                                 </HBox.margin>
+                              </Label>
+                           </children>
+                        </HBox>
+                     </children></VBox>
+               </content>
+            </ScrollPane>
+            <HBox fx:id="hbox2" layoutY="545.0" prefHeight="56.0" prefWidth="683.0">
+               <children>
+                  <Button fx:id="button_fichier" mnemonicParsing="false" onAction="#Fichier">
+                     <graphic>
+                        <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/trombone.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <HBox.margin>
+                        <Insets top="7.0" />
+                     </HBox.margin>
+                  </Button>
+                  <TextField fx:id="message_envoyer" prefHeight="31.0" prefWidth="597.0" promptText="Entrer un message...">
+                     <HBox.margin>
+                        <Insets top="9.0" />
+                     </HBox.margin>
+                  </TextField>
+                  <Button fx:id="button_envoyer" mnemonicParsing="false" onAction="#Envoie">
+                     <graphic>
+                        <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/fleche-droite.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <HBox.margin>
+                        <Insets top="7.0" />
+                     </HBox.margin>
+                  </Button>
+               </children>
+            </HBox>
+         </children>
+      </Pane>
+   </children>
+</AnchorPane>

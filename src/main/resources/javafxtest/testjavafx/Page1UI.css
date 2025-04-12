@@ -1,0 +1,113 @@
+#pane1 {
+    -fx-background-color : #111010;
+}
+
+#pane2 {
+    -fx-background-color : #141725;
+}
+
+#pane3 {
+    -fx-background-color : #ddd8d8;
+}
+
+#scrollpane1 {
+    -fx-background-color : transparent;
+}
+
+#scrollpane2 {
+    -fx-background-color : transparent;
+}
+
+.scroll-bar:vertical {
+    -fx-background-color : transparent;
+    -fx-border-color : transparent;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color : #3d3c3c;
+}
+
+.increment-button, .decrement-button {
+    -fx-background-color: transparent;
+}
+
+#recherche_conversation {
+    -fx-background-color : #3d3c3c;
+    -fx-text-fill : white;
+    -fx-font-weight : bold;
+    -fx-font-size : 13;
+    -fx-background-radius : 10;
+}
+
+#message_envoyer {
+    -fx-background-color : white;
+    -fx-background-radius : 10;
+    -fx-font-size : 15;
+    -fx-text-fill : black;
+}
+
+#vbox1 {
+    -fx-background-color : #141725;
+}
+
+#vbox2 {
+    -fx-background-color : #ddd8d8;
+}
+
+#hbox1 {
+    -fx-background-color : #ddd8d8;
+    -fx-border-color : #8d8d8d;
+    -fx-border-width : 0 0 2 0;
+}
+
+#hbox2 {
+    -fx-background-color : white;
+}
+
+#nom_utilisateur {
+    -fx-font-weight : bold;
+    -fx-font-size : 13;
+}
+
+#button_exit {
+    -fx-background-color : #111010;
+    -fx-cursor : hand;
+}
+
+.button:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-border-color : lightblue;
+    -fx-border-width : 1;
+}
+
+.button:pressed {
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+    -fx-border-color : lightblue;
+    -fx-border-width : 1;
+}
+
+.button {
+    -fx-background-color : transparent;
+    -fx-cursor : hand;
+}
+
+#button_test1, #button_test2 {
+    -fx-text-fill : white;
+    -fx-border-color : gray;
+    -fx-border-width : 0 0 0.1 0;
+}
+
+#message_a_envoyer, #message_recue {
+    -fx-font-family : "Cambria Math";
+    -fx-text-fill : black;
+    -fx-font-size : 14;
+    -fx-font-weight : bold;
+    -fx-background-color : #e7961c;
+    -fx-background-radius : 8;
+}
+
+#message_recue {
+    -fx-background-color : #67fd30;
+}
