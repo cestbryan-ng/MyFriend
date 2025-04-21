@@ -151,11 +151,12 @@ public class Page1Controller implements Initializable {
 
                     FileOutputStream fichier_recu = new FileOutputStream(nom_fichier);
                     // On recupere le fichier
-                    byte[] buffer = new byte[1024000];
-                    int bytesRead;
-                    while ((taille_fichier > 0) && (bytesRead = MainPageController.in.read(buffer, 0, (int) Math.min(buffer.length, taille_fichier))) != -1) {
-                        fichier_recu.write(buffer, 0, bytesRead);
-                        taille_fichier -= bytesRead;
+                    byte[] buffer = new byte[65536];
+                    int bytesLues;
+                    while ((bytesLues = MainPageController.in.read(buffer, 0, (int) Math.min(buffer.length, taille_fichier))) != 0) {
+                        System.out.println(bytesLues);
+                        fichier_recu.write(buffer, 0, bytesLues);
+                        taille_fichier -= bytesLues;
                     }
                     fichier_recu.close();
 
@@ -197,10 +198,10 @@ public class Page1Controller implements Initializable {
         File fichier = fileChooser.showOpenDialog(stage);
 
         if (fichier != null) {
-            if (fichier.length() > 10240000) {
+            if (fichier.length() > 256000) {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setHeaderText("Trop volumineux");
-                alert.setContentText("Envoyer des fichiers de moins de 10Mo");
+                alert.setContentText("Envoyer des fichiers de moins de 256Ko");
                 alert.showAndWait();
                 return;
             }
@@ -214,10 +215,10 @@ public class Page1Controller implements Initializable {
                 MainPageController.out.writeLong(fichier.length());
 
                 // Pour l'envoie de fichier en faisant du hanshake
-                byte[] buffer = new byte[10240000];
-                int bytesRead;
-                while ((bytesRead = fichier_envoie.read(buffer)) != -1) {
-                    MainPageController.out.write(buffer, 0, bytesRead);
+                byte[] buffer = new byte[65536];
+                int bytesLues;
+                while ((bytesLues = fichier_envoie.read(buffer)) != -1) {
+                    MainPageController.out.write(buffer, 0, bytesLues);
                 }
 
                 Label label = new Label();

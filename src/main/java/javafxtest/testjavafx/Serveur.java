@@ -66,17 +66,19 @@ public class Serveur {
                         FileOutputStream fichier_recu = new FileOutputStream(nom_fichier);
 
                         // On recupere le fichier
-                        byte[] buffer = new byte[10240000];
-                        int bytesRead;
-                        while ((taille_fichier > 0) && (bytesRead = in.read(buffer, 0, (int) Math.min(buffer.length, taille_fichier))) != -1) {
-                            fichier_recu.write(buffer, 0, bytesRead);
-                            taille_fichier -= bytesRead;
+                        byte[] buffer = new byte[65536];
+                        int bytesLues;
+                        while ((bytesLues = in.read(buffer, 0, (int) Math.min(buffer.length, taille_fichier))) != 0) {
+                            System.out.println(bytesLues);
+                            fichier_recu.write(buffer, 0, bytesLues);
+                            taille_fichier -= bytesLues;
                         }
-                        fichier_recu.close();
+
+                        fichier_recu.flush();
                         System.out.println("Fichier recu de (Adresse  inconnue) : " + nom_fichier);
 
                         FileInputStream fichier_envoie = new FileInputStream(nom_fichier);
-                        buffer = new byte[1024000];
+                        buffer = new byte[65536];
                         synchronized (clients) {
                             for (DataOutputStream client : clients) {
                                 client.writeUTF("fichier");
@@ -84,8 +86,9 @@ public class Serveur {
                                 client.writeLong(new File(nom_fichier).length());
 
                                 // Pour l'envoie de fichier en faisant du hanshake
-                                while ((bytesRead = fichier_envoie.read(buffer)) != -1) {
-                                    client.write(buffer, 0, bytesRead);
+                                while ((bytesLues = fichier_envoie.read(buffer)) != -1) {
+                                    System.out.println(bytesLues);
+                                    client.write(buffer, 0, bytesLues);
                                 }
                             }
                         }
