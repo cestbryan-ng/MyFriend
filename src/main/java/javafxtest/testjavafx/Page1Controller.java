@@ -7,6 +7,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.NodeOrientation;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -196,6 +197,14 @@ public class Page1Controller implements Initializable {
         File fichier = fileChooser.showOpenDialog(stage);
 
         if (fichier != null) {
+            if (fichier.length() > 10240000) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setHeaderText("Trop volumineux");
+                alert.setContentText("Envoyer des fichiers de moins de 10Mo");
+                alert.showAndWait();
+                return;
+            }
+
             MainPageController.out.writeUTF("fichier");
 
             try {
@@ -205,7 +214,7 @@ public class Page1Controller implements Initializable {
                 MainPageController.out.writeLong(fichier.length());
 
                 // Pour l'envoie de fichier en faisant du hanshake
-                byte[] buffer = new byte[1024000];
+                byte[] buffer = new byte[10240000];
                 int bytesRead;
                 while ((bytesRead = fichier_envoie.read(buffer)) != -1) {
                     MainPageController.out.write(buffer, 0, bytesRead);

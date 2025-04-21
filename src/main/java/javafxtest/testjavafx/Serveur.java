@@ -66,7 +66,7 @@ public class Serveur {
                         FileOutputStream fichier_recu = new FileOutputStream(nom_fichier);
 
                         // On recupere le fichier
-                        byte[] buffer = new byte[1024000];
+                        byte[] buffer = new byte[10240000];
                         int bytesRead;
                         while ((taille_fichier > 0) && (bytesRead = in.read(buffer, 0, (int) Math.min(buffer.length, taille_fichier))) != -1) {
                             fichier_recu.write(buffer, 0, bytesRead);
