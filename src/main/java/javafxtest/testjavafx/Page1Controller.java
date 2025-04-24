@@ -129,6 +129,7 @@ public class Page1Controller implements Initializable {
                     String message_recu = "";
                     try {
                         message_recu = MainPageController.in.readUTF();
+                        System.out.println("Message reçu");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -158,6 +159,7 @@ public class Page1Controller implements Initializable {
                         fichier_recu.write(buffer, 0, bytesLues);
                         taille_fichier -= bytesLues;
                     }
+                    System.out.println("reçu avec succès");
                     fichier_recu.close();
 
                     Platform.runLater(() -> {

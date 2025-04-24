@@ -69,11 +69,11 @@ public class Serveur {
                         byte[] buffer = new byte[65536];
                         int bytesLues;
                         while ((bytesLues = in.read(buffer, 0, (int) Math.min(buffer.length, taille_fichier))) != 0) {
-                            System.out.println(bytesLues);
+                            System.out.println("reçu : " + bytesLues + "/" + taille_fichier + " (octets)");
                             fichier_recu.write(buffer, 0, bytesLues);
                             taille_fichier -= bytesLues;
                         }
-
+                        System.out.println("fin");
                         fichier_recu.flush();
                         System.out.println("Fichier recu de (Adresse  inconnue) : " + nom_fichier);
 
@@ -87,7 +87,7 @@ public class Serveur {
 
                                 // Pour l'envoie de fichier en faisant du hanshake
                                 while ((bytesLues = fichier_envoie.read(buffer)) != -1) {
-                                    System.out.println(bytesLues);
+                                    System.out.println("envoyé : " + bytesLues + "/" + taille_fichier + " (octects)");
                                     client.write(buffer, 0, bytesLues);
                                 }
                             }
