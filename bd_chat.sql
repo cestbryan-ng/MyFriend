@@ -1,3 +1,5 @@
+CREATE DATABASE  IF NOT EXISTS `monapp` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `monapp`;
 -- MySQL dump 10.13  Distrib 8.0.40, for Win64 (x86_64)
 --
 -- Host: localhost    Database: monapp
@@ -14,6 +16,95 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `connected_user`
+--
+
+DROP TABLE IF EXISTS `connected_user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `connected_user` (
+  `connected_userid` int NOT NULL,
+  `user_id` int NOT NULL,
+  `statut` varchar(20) NOT NULL DEFAULT 'offline',
+  `adresse_ip` varchar(20) NOT NULL,
+  `last_connection` timestamp NOT NULL,
+  PRIMARY KEY (`connected_userid`),
+  UNIQUE KEY `user_id` (`user_id`),
+  UNIQUE KEY `adresse_ip` (`adresse_ip`),
+  CONSTRAINT `f1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `connected_user`
+--
+
+LOCK TABLES `connected_user` WRITE;
+/*!40000 ALTER TABLE `connected_user` DISABLE KEYS */;
+/*!40000 ALTER TABLE `connected_user` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `message`
+--
+
+DROP TABLE IF EXISTS `message`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `message` (
+  `message_id` int NOT NULL,
+  `sender_id` int NOT NULL,
+  `recever_id` int NOT NULL,
+  `content` varchar(150) NOT NULL,
+  `media_url` varchar(100) DEFAULT NULL,
+  `statut` varchar(10) NOT NULL DEFAULT 'sent',
+  `time_send` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`message_id`),
+  KEY `f2` (`sender_id`),
+  KEY `f3` (`recever_id`),
+  CONSTRAINT `f2` FOREIGN KEY (`sender_id`) REFERENCES `connected_user` (`user_id`),
+  CONSTRAINT `f3` FOREIGN KEY (`recever_id`) REFERENCES `connected_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `message`
+--
+
+LOCK TABLES `message` WRITE;
+/*!40000 ALTER TABLE `message` DISABLE KEYS */;
+/*!40000 ALTER TABLE `message` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user`
+--
+
+DROP TABLE IF EXISTS `user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `user` (
+  `user_id` int NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `code_acces` varchar(150) NOT NULL,
+  `phone_number` int NOT NULL,
+  `profile_picture` char(1) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `phone_number` (`phone_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user`
+--
+
+LOCK TABLES `user` WRITE;
+/*!40000 ALTER TABLE `user` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `utilisateurs`
@@ -52,4 +143,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-08  3:18:47
+-- Dump completed on 2025-04-24 11:57:36
