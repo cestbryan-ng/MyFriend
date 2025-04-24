@@ -54,8 +54,10 @@ public class Serveur {
                         System.out.println("Message recu de (Adresse inconnue) : " + message);
                         synchronized (clients) {
                             for (DataOutputStream client : clients) {
-                                client.writeUTF("message");
-                                client.writeUTF(message);
+                                if (client != out) {
+                                    client.writeUTF("message");
+                                    client.writeUTF(message);
+                                }
                             }
                             System.out.println("Message envoyé aux autres clients : " + message);
                         }
@@ -81,14 +83,16 @@ public class Serveur {
                         buffer = new byte[65536];
                         synchronized (clients) {
                             for (DataOutputStream client : clients) {
-                                client.writeUTF("fichier");
-                                client.writeUTF(nom_fichier);
-                                client.writeLong(new File(nom_fichier).length());
+                                if (client != this.out) {
+                                    client.writeUTF("fichier");
+                                    client.writeUTF(nom_fichier);
+                                    client.writeLong(new File(nom_fichier).length());
 
-                                // Pour l'envoie de fichier en faisant du hanshake
-                                while ((bytesLues = fichier_envoie.read(buffer)) != -1) {
-                                    System.out.println("envoyé : " + bytesLues + "/" + taille_fichier + " (octects)");
-                                    client.write(buffer, 0, bytesLues);
+                                    // Pour l'envoie de fichier en faisant du hanshake
+                                    while ((bytesLues = fichier_envoie.read(buffer)) != -1) {
+                                        System.out.println("envoyé : " + bytesLues + "/" + taille_fichier + " (octects)");
+                                        client.write(buffer, 0, bytesLues);
+                                    }
                                 }
                             }
                         }
