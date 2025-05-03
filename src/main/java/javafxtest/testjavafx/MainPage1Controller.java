@@ -35,21 +35,34 @@ public class MainPage1Controller {
     @FXML
     private TextField nom_utilisateur;
 
+    @FXML
+    private TextField numero_tel;
+
+    @FXML
+    private TextField photo_profil;
+
     static List<String> liste_nom = new ArrayList<>();
     static List<String> liste_pass = new ArrayList<>();
     static Map<String, String> utilisateurs_etatsenligne = new HashMap<>();
+
+    @FXML
+    void profile(ActionEvent event) {
+
+    }
 
     @FXML
     void Inscrire(ActionEvent event) {
         String nomutilisateur = nom_utilisateur.getText();
         String motdepasse1 = mot_de_passe_utilisateur1.getText();
         String motdepasse2 = mot_de_passe_utilisateur2.getText();
+        String numero = numero_tel.getText();
+        String profil = photo_profil.getText();
         liste_nom.clear();
         liste_pass.clear();
         message_erreur.setStyle("-fx-text-fill : red");
 
-        if ((nomutilisateur.isEmpty()) || (motdepasse1.isEmpty()) || (motdepasse2.isEmpty())) {
-            message_erreur.setText("Entrer votre nom ou/et votre mot de passe");
+        if ((nomutilisateur.isEmpty()) || (motdepasse1.isEmpty()) || (motdepasse2.isEmpty()) || (numero.isEmpty())) {
+            message_erreur.setText("Vérifier votre nom, mot de passe ou numéro");
             return;
         }
 
@@ -58,17 +71,12 @@ public class MainPage1Controller {
             return;
         }
 
-        try(Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/monapp", "Jean_Roland", "Papasenegal0");
-            Statement stm = connection.createStatement()) {
-            stm.executeUpdate("insert into utilisateurs(nom_utilisateur, mot_de_passe) values (\"" + nomutilisateur + "\",\"" + motdepasse1 + "\");");
-            ResultSet resultSet = stm.executeQuery("select * from utilisateurs;");
-            while (resultSet.next()) {
-                liste_nom.add(resultSet.getString(2));
-                liste_pass.add(resultSet.getString(3));
-                utilisateurs_etatsenligne.put(resultSet.getString(2), resultSet.getString(4));
-            }
-            resultSet.close();
-            System.out.println(liste_nom + " " + liste_pass);
+        try(Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/monapp", "Jean_Roland", "Papasenegal0"); Statement stm = connection.createStatement()) {
+            if (profil.isEmpty()) stm.executeUpdate("insert into user(username, code_acces, phone_number) values(\""+ nomutilisateur +"\", \""+ motdepasse1 +"\", "+ numero +");");
+            else {}
+            stm.executeUpdate("insert into connected_user(user_id)\n" +
+                    "select user_id from user\n" +
+                    "where username = \""+ nomutilisateur +"\";");
             message_erreur.setText("Inscription reussie");
             message_erreur.setStyle("-fx-text-fill : green");
             Alert alert = new Alert(Alert.AlertType.INFORMATION);

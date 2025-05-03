@@ -38,6 +38,18 @@
     -fx-cursor: hand;
 }
 
+#button4 {
+        -fx-background-color : black;
+        -fx-text-fill : white;
+        -fx-font-weight: bold;
+        -fx-font-size : 9;
+        -fx-border-color : white;
+        -fx-border-width : 1 1 1 1;
+        -fx-border-radius : 0;
+        -fx-background-radius : 10;
+        -fx-cursor: hand;
+}
+
 .button:hover {
     -fx-border-width : 0;
     -fx-scale-x: 1.05;

@@ -30,8 +30,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.opencv.core.Core;
+
 public class Page1Controller implements Initializable {
     static List<String> liste_nom = new ArrayList<>();
+    private String recepteur = "";
 
     @FXML
     private AnchorPane anchorpane1;
@@ -64,29 +67,25 @@ public class Page1Controller implements Initializable {
         vbox1.getChildren().clear();
         vbox2.getChildren().clear();
 
-        try (Connection  connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/monapp", "Jean_Roland", "Papasenegal0"); Statement stmt = connection.createStatement()) {
-            ResultSet resultSet1 = stmt.executeQuery("select * from utilisateurs;");
-            while(resultSet1.next()) {
-                liste_nom.add(resultSet1.getString(2));
+        try (Connection  connection = BaseDeDonnee.seConnecter(); Statement stmt = connection.createStatement()) {
+            ResultSet resultSet = stmt.executeQuery("select username from user\n" +
+                    "where username != \""+ MainPageController.nomutilisateur +"\";");
+            while (resultSet.next()) {
+                Button button = new Button(resultSet.getString(1));
+                button.setPrefSize(191, 47);
+                button.setGraphicTextGap(20);
+                ImageView imageView = new ImageView(new Image(getClass().getResource("images/cercle1.png").toString()));
+                imageView.setFitWidth(36);
+                imageView.setFitHeight(47);
+                imageView.setPreserveRatio(true);
+                button.setGraphic(imageView);
+                button.setStyle("-fx-text-fill : white; -fx-border-color : gray; -fx-border-width : 0 0 0.1 0; -fx-cursor : hand;");
+                button.setOnAction(event -> Charger(event));
+                vbox1.getChildren().add(button);
             }
-            liste_nom.remove(MainPageController.nomutilisateur);
-            resultSet1.close();
+
         } catch (SQLException e) {
             e.printStackTrace();
-        }
-
-        for (String nom : liste_nom) {
-            Button button = new Button(nom);
-            button.setPrefSize(191, 47);
-            button.setGraphicTextGap(20);
-            ImageView imageView = new ImageView(new Image(getClass().getResource("images/cercle1.png").toString()));
-            imageView.setFitWidth(36);
-            imageView.setFitHeight(47);
-            imageView.setPreserveRatio(true);
-            button.setGraphic(imageView);
-            button.setStyle("-fx-text-fill : white; -fx-border-color : gray; -fx-border-width : 0 0 0.1 0; -fx-cursor : hand;");
-            button.setOnAction(event -> Charger(event));
-            vbox1.getChildren().add(button);
         }
     }
 
@@ -100,6 +99,67 @@ public class Page1Controller implements Initializable {
         if (message_envoyer.getText().equals("")) return;
 
         try {
+            Integer sender_id = 0, recever_id = 0;
+            String indice_connexion = "offline",  adresse_recepteur = "";
+            try (Connection connection = BaseDeDonnee.seConnecter(); Statement stmt = connection.createStatement()) {
+                ResultSet resultSet1 = stmt.executeQuery("select statut from connected_user\n" +
+                        "where user_id in (\n" +
+                        "select user_id from user\n" +
+                        "where username = \""+ recepteur +"\");");
+                while (resultSet1.next()) {
+                    indice_connexion = resultSet1.getString(1);
+                }
+                resultSet1.close();
+
+                ResultSet resultSet2 = stmt.executeQuery("select connected_userid from connected_user\n" +
+                        "where user_id in \n" +
+                        "(select user_id from user where username = \""+ MainPageController.nomutilisateur +"\") ;");
+                while (resultSet2.next()) {
+                    sender_id = resultSet2.getInt(1);
+                }
+                resultSet2.close();
+
+                ResultSet resultSet3 = stmt.executeQuery("select connected_userid from connected_user\n" +
+                        "where user_id in \n" +
+                        "(select user_id from user where username = \""+ recepteur +"\") ;");
+                while (resultSet3.next()) {
+                    recever_id = resultSet3.getInt(1);
+                }
+                resultSet3.close();
+
+                ResultSet resultSet4 = stmt.executeQuery("select adresse_ip from connected_user\n" +
+                        "where user_id in \n" +
+                        "(select user_id from user where username = \""+ recepteur +"\");");
+                while (resultSet4.next()) {
+                        adresse_recepteur = resultSet4.getString(1);
+                        adresse_recepteur = "/" + adresse_recepteur.split("/")[1];
+                }
+                resultSet4.close();
+
+                stmt.executeUpdate("insert into message(sender_id, recever_id, content)\n" +
+                        "values (\""+ sender_id +"\", \""+ recever_id +"\", \""+ message_envoyer.getText() +"\");");
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            if (indice_connexion.equals("offline")) {
+                Label label = new Label();
+                label.setText(message_envoyer.getText());
+                label.setPrefHeight(25);
+                label.setAlignment(Pos.BASELINE_CENTER);
+                label.setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
+                label.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14; -fx-font-weight : bold; -fx-background-color : #e7961c; -fx-background-radius : 20;");
+                HBox hBox = new HBox();
+                vbox2.getChildren().add(hBox);
+                hBox.getChildren().add(label);
+                hBox.setAlignment(Pos.CENTER_RIGHT);
+                HBox.setMargin(label, new Insets(10, 0, 0, 10));
+                message_envoyer.deleteText(0, message_envoyer.getText().length());
+                return;
+            }
+
+            MainPageController.out.writeUTF(adresse_recepteur);
             MainPageController.out.writeUTF("message");
             MainPageController.out.writeUTF(message_envoyer.getText());
             Label label = new Label();
@@ -184,9 +244,12 @@ public class Page1Controller implements Initializable {
 
     @FXML
     void Fermer(ActionEvent event) throws SQLException {
-        Connection  connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/monapp", "Jean_Roland", "Papasenegal0");
+        Connection  connection = BaseDeDonnee.seConnecter();
         Statement stmt = connection.createStatement();
-        stmt.executeUpdate("update utilisateurs set indice_de_connexion = \"non\";");
+        stmt.executeUpdate("update connected_user\n" +
+                "set statut = \"offline\"\n" +
+                "where user_id in (\n" +
+                "select user_id from user where username = \""+ MainPageController.nomutilisateur +"\");");
         stmt.close();
         connection.close();
         Stage stage = (Stage) anchorpane1.getScene().getWindow();
@@ -208,15 +271,75 @@ public class Page1Controller implements Initializable {
                 return;
             }
 
-            MainPageController.out.writeUTF("fichier");
+            Integer sender_id = 0, recever_id = 0;
+            String adresse_recepteur = "";
+            String indice_connexion = "";
 
             try {
                 FileInputStream fichier_envoie = new FileInputStream(fichier);
 
+                try (Connection connection = BaseDeDonnee.seConnecter(); Statement stmt = connection.createStatement()) {
+                    ResultSet resultSet1 = stmt.executeQuery("select statut from connected_user\n" +
+                            "where user_id in (\n" +
+                            "select user_id from user\n" +
+                            "where username = \""+ recepteur +"\");");
+                    while (resultSet1.next()) {
+                        indice_connexion = resultSet1.getString(1);
+                    }
+                    resultSet1.close();
+                    ResultSet resultSet2 = stmt.executeQuery("select connected_userid from connected_user\n" +
+                            "where user_id in \n" +
+                            "(select user_id from user where username = \""+ MainPageController.nomutilisateur +"\") ;");
+                    while (resultSet2.next()) {
+                        sender_id = resultSet2.getInt(1);
+                    }
+                    resultSet2.close();
+
+                    ResultSet resultSet3 = stmt.executeQuery("select connected_userid from connected_user\n" +
+                            "where user_id in \n" +
+                            "(select user_id from user where username = \""+ recepteur +"\") ;");
+                    while (resultSet3.next()) {
+                        recever_id = resultSet3.getInt(1);
+                    }
+                    resultSet3.close();
+
+                    ResultSet resultSet4 = stmt.executeQuery("select adresse_ip from connected_user\n" +
+                            "where user_id in \n" +
+                            "(select user_id from user where username = \""+ recepteur +"\");");
+                    while (resultSet4.next()) {
+                        adresse_recepteur = resultSet4.getString(1);
+                        adresse_recepteur = "/" + adresse_recepteur.split("/")[1];
+                    }
+                    resultSet4.close();
+
+                    stmt.executeUpdate("insert into message(sender_id, recever_id, content)\n" +
+                            "values (\""+ sender_id +"\", \""+ recever_id +"\", \"Fichier "+ fichier.getName() +"\");");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                if (indice_connexion.equals("offline")) {
+                    Label label = new Label();
+                    label.setText("Fichier " + fichier.getName() + " envoyé");
+                    label.setPrefHeight(25);
+                    label.setAlignment(Pos.BASELINE_CENTER);
+                    label.setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
+                    label.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14; -fx-font-weight : bold; -fx-background-color : #e7961c; -fx-background-radius : 20;");
+                    HBox hBox = new HBox();
+                    vbox2.getChildren().add(hBox);
+                    hBox.getChildren().add(label);
+                    hBox.setAlignment(Pos.CENTER_RIGHT);
+                    HBox.setMargin(label, new Insets(10, 0, 0, 10));
+                    message_envoyer.deleteText(0, message_envoyer.getText().length());
+                    return;
+                }
+
+                MainPageController.out.writeUTF(adresse_recepteur);
+                MainPageController.out.writeUTF("fichier");
                 MainPageController.out.writeUTF(fichier.getName());
                 MainPageController.out.writeLong(fichier.length());
 
-                // Pour l'envoie de fichier en faisant du hanshake
+                // Pour l'envoie de fichier en faisant du handshake
                 byte[] buffer = new byte[65536];
                 int bytesLues;
                 while ((bytesLues = fichier_envoie.read(buffer)) != -1) {
@@ -249,36 +372,91 @@ public class Page1Controller implements Initializable {
 
     @FXML
     void Charger(ActionEvent event) {
-        Button button_clique = (Button) event.getSource();
-        String nomutilisateur = button_clique.getText(), indice_de_connexion = "non";
-        nom_utilisateur.setText(nomutilisateur);
+        vbox2.getChildren().clear();
 
-        try (Connection  connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/monapp", "Jean_Roland", "Papasenegal0"); Statement stmt = connection.createStatement()) {
-            ResultSet resultSet1 = stmt.executeQuery("select indice_de_connexion from utilisateurs\n" +
-                    "where nom_utilisateur = \""+ nomutilisateur +"\";");
+        Button button_clique = (Button) event.getSource();
+        String indice_de_connexion = "offline";
+        recepteur = button_clique.getText();
+        nom_utilisateur.setText(recepteur);
+        Integer self = 0, other = 0;
+
+        try (Connection  connection = BaseDeDonnee.seConnecter(); Statement stmt = connection.createStatement()) {
+            ResultSet resultSet1 = stmt.executeQuery("select statut from connected_user\n" +
+                    "where user_id in (\n" +
+                    "select user_id from user\n" +
+                    "where username = \""+ recepteur +"\");");
             while(resultSet1.next()) {
                 indice_de_connexion = resultSet1.getString(1);
             }
             resultSet1.close();
+
+            ResultSet resultSet2 = stmt.executeQuery("select connected_userid from connected_user\n" +
+                    "where user_id in \n" +
+                    "(select user_id from user where username = \""+ MainPageController.nomutilisateur +"\") ;");
+            while (resultSet2.next()) {
+                self = resultSet2.getInt(1);
+            }
+            resultSet2.close();
+
+            ResultSet resultSet3 = stmt.executeQuery("select connected_userid from connected_user\n" +
+                    "where user_id in \n" +
+                    "(select user_id from user where username = \""+ recepteur +"\") ;");
+            while (resultSet3.next()) {
+                other = resultSet3.getInt(1);
+            }
+            resultSet3.close();
+
+            ResultSet resultSet4 = stmt.executeQuery("select sender_id, recever_id, content from message\n" +
+                    "where sender_id = \""+ self +"\" or \""+ other +"\"\n" +
+                    "and recever_id = \""+ self +"\" or \""+ other +"\";");
+            while (resultSet4.next()) {
+                if (self.equals(resultSet4.getInt(1))) {
+                    Label label = new Label();
+                    label.setText(resultSet4.getString(3));
+                    label.setPrefHeight(25);
+                    label.setAlignment(Pos.BASELINE_CENTER);
+                    label.setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
+                    label.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14; -fx-font-weight : bold; -fx-background-color : #e7961c; -fx-background-radius : 20;");
+                    HBox hBox = new HBox();
+                    vbox2.getChildren().add(hBox);
+                    hBox.getChildren().add(label);
+                    hBox.setAlignment(Pos.CENTER_RIGHT);
+                    HBox.setMargin(label, new Insets(10, 0, 0, 10));
+                } else {
+                    Label label = new Label();
+                    label.setText(resultSet4.getString(3));
+                    label.setPrefHeight(25);
+                    label.setAlignment(Pos.BASELINE_CENTER);
+                    label.setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
+                    label.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14; -fx-font-weight : bold; -fx-background-color : lightgreen; -fx-background-radius : 20;");
+                    HBox hBox = new HBox();
+                    vbox2.getChildren().add(hBox);
+                    hBox.getChildren().add(label);
+                    HBox.setMargin(label, new Insets(10, 0, 0, 10));
+                }
+            }
+            resultSet4.close();
+
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
 
-        if (indice_de_connexion.equals("oui")) {
-            profil_enligne.setImage(new Image(getClass().getResource("images/rondvert.png").toString()));
-        } else {
-            profil_enligne.setImage(new Image(getClass().getResource("images/rondrouge.png").toString()));
-        }
+        if (indice_de_connexion.equals("online")) profil_enligne.setImage(new Image(getClass().getResource("images/rondvert.png").toString()));
+        else profil_enligne.setImage(new Image(getClass().getResource("images/rondrouge.png").toString()));
     }
 
     @FXML
     void Rechercher() {
         vbox1.getChildren().clear();
 
-        if (recherche_conversation.getText().equals("")) {
-            for (String nom : MainPageController.liste_nom) {
-                Button button = new Button(nom);
+        try (Connection  connection = BaseDeDonnee.seConnecter(); Statement stmt = connection.createStatement()) {
+            ResultSet resultSet = stmt.executeQuery("select username from user\n" +
+                    "where username like \"%"+ recherche_conversation.getText().toLowerCase() +"%\"" +
+                    "and username != \""+ MainPageController.nomutilisateur +"\";");
+            while (resultSet.next()) {
+                Button button = new Button(resultSet.getString(1));
                 button.setPrefSize(191, 47);
                 button.setGraphicTextGap(20);
                 ImageView imageView = new ImageView(new Image(getClass().getResource("images/cercle1.png").toString()));
@@ -290,24 +468,8 @@ public class Page1Controller implements Initializable {
                 button.setOnAction(event -> Charger(event));
                 vbox1.getChildren().add(button);
             }
-            return;
-        }
-
-        for (String nom : MainPageController.liste_nom) {
-            if (!(nom.toLowerCase().contains(recherche_conversation.getText()))) {
-                continue;
-            }
-            Button button = new Button(nom);
-            button.setPrefSize(191, 47);
-            button.setGraphicTextGap(20);
-            ImageView imageView = new ImageView(new Image(getClass().getResource("images/cercle1.png").toString()));
-            imageView.setFitWidth(36);
-            imageView.setFitHeight(47);
-            imageView.setPreserveRatio(true);
-            button.setGraphic(imageView);
-            button.setStyle("-fx-text-fill : white; -fx-border-color : gray; -fx-border-width : 0 0 0.1 0; -fx-cursor : hand;");
-            button.setOnAction(event -> Charger(event));
-            vbox1.getChildren().add(button);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
