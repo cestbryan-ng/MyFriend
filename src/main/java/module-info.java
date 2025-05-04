@@ -4,6 +4,7 @@ module javafxtest.testjavafx {
     requires java.sql;
     requires jdk.compiler;
     requires opencv;
+    requires javafx.swing;
 
 
     opens javafxtest.testjavafx to javafx.fxml;

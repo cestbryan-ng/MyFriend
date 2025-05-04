@@ -3,10 +3,12 @@ package javafxtest.testjavafx;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.NodeOrientation;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -29,8 +31,6 @@ import javafx.scene.layout.VBox;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
-
-import org.opencv.core.Core;
 
 public class Page1Controller implements Initializable {
     static List<String> liste_nom = new ArrayList<>();
@@ -91,6 +91,7 @@ public class Page1Controller implements Initializable {
 
     @FXML
     void Appel(ActionEvent event) {
+
 
     }
 
@@ -366,8 +367,16 @@ public class Page1Controller implements Initializable {
     }
 
     @FXML
-    void Video(ActionEvent event) {
-
+    void Video(ActionEvent event) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("Page1Video.fxml"));
+        Scene scene = new Scene(fxmlLoader.load(), 950, 500);
+        scene.getStylesheets().add(getClass().getResource("Page1VideoUI.css").toExternalForm());
+        Stage stage = new Stage();
+        stage.setTitle("MonApp");
+        stage.setScene(scene);
+        stage.show();
+        Stage stage1 = (Stage) anchorpane1.getScene().getWindow();
+        stage1.close();
     }
 
     @FXML

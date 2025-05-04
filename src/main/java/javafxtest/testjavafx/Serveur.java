@@ -52,6 +52,7 @@ public class Serveur {
                 System.out.println("Liste des clients " + clients + " " + ip_client);
 
                 while (true) {
+
                     adresse_ip = in.readUTF();
                     if (!(ip_client.contains(adresse_ip))) continue;
                     message = in.readUTF();
@@ -104,8 +105,13 @@ public class Serveur {
                         }
                         fichier_envoie.close();
                         System.out.println("Fichier envoyé à "+ adresse_ip +" : " + nom_fichier);
+
+                    } else if (message.equals("video")) {
+
                     }
                 }
+
+
 
             } catch (IOException e) {
 
