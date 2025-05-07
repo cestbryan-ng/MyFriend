@@ -10,6 +10,11 @@
     -fx-background-color : #434343;
 }
 
+.label {
+    -fx-font-weight : bold;
+    -fx-font-size : 18;
+}
+
 .button {
     -fx-background-color : transparent;
     -fx-cursor : hand;

@@ -6,6 +6,7 @@ module javafxtest.testjavafx {
     requires opencv;
     requires javafx.swing;
 
+
     opens javafxtest.testjavafx to javafx.fxml;
     exports javafxtest.testjavafx;
 }

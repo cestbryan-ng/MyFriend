@@ -117,6 +117,7 @@ public class Page1Controller implements Initializable {
         try {
             Integer sender_id = 0, recever_id = 0;
             String indice_connexion = "offline",  adresse_recepteur = "";
+
             try (Connection connection = BaseDeDonnee.seConnecter(); Statement stmt = connection.createStatement()) {
                 ResultSet resultSet1 = stmt.executeQuery("select statut from connected_user\n" +
                         "where user_id in (\n" +

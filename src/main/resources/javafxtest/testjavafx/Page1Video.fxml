@@ -2,10 +2,12 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <VBox fx:id="vbox1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="410.0" prefWidth="930.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxtest.testjavafx.Page1VideoController">
    <children>
@@ -15,7 +17,15 @@
                <HBox.margin>
                   <Insets right="50.0" />
                </HBox.margin></ImageView>
-            <ImageView fx:id="imageview2" fitHeight="320.0" fitWidth="440.0" pickOnBounds="true" preserveRatio="true" />
+            <ImageView fx:id="imageview2" fitHeight="320.0" fitWidth="87.0" pickOnBounds="true" preserveRatio="true" />
+            <Label fx:id="message_connexion" text="En attente de connexion..." textFill="WHITE">
+               <HBox.margin>
+                  <Insets left="30.0" top="160.0" />
+               </HBox.margin>
+               <font>
+                  <Font name="Cambria" size="18.0" />
+               </font>
+            </Label>
          </children>
          <VBox.margin>
             <Insets bottom="5.0" />

@@ -45,13 +45,13 @@ public class ServeurVideo {
                 synchronized (clients) {
                     clients.add(out);
                     ip_client.add(this.socket.getInetAddress().toString());
+                    ip_client.set(0, "aaaa");
                 }
 
                 System.out.println("Liste des clients pour les appels vidéo " + clients + " " + ip_client);
 
                 while (true) {
                     adresse_ip = in.readUTF();
-                    if (!(ip_client.contains(adresse_ip))) continue;
                     message = in.readUTF();
                     if (message.equals("video")) {
                         while (true) {
@@ -85,7 +85,7 @@ public class ServeurVideo {
                     e.printStackTrace();
                 }
                 synchronized (clients) {
-                    System.out.println("Client "+ this.socket.getInetAddress() +" déconnecté.");
+                    System.out.println("Client déconnecté.");
                     clients.remove(out);
                     ip_client.remove(this.socket.getInetAddress().toString());
                 }

@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -41,6 +42,9 @@ public class Page1VideoController implements Initializable {
 
     @FXML
     private ImageView imageview2;
+
+    @FXML
+    private Label message_connexion;
 
     public void initialize(URL location, ResourceBundle resources) {
         new Thread(this::recevoir).start();
@@ -134,12 +138,15 @@ public class Page1VideoController implements Initializable {
                 int length = Page1Controller.in.readInt();
                 data = new byte[length];
                 Page1Controller.in.readFully(data);
+                message_connexion.setText("");
 
                 Mat img = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.IMREAD_COLOR);
                 Image fxImage = MatEnImage.matToImage(img);
 
                 Platform.runLater(() -> {
                     imageview2.setImage(fxImage);
+                    imageview2.setFitHeight(320);
+                    imageview2.setFitWidth(440);
                 });
             }
         } catch (IOException e) {

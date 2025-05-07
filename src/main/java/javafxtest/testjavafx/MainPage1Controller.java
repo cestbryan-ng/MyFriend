@@ -71,7 +71,7 @@ public class MainPage1Controller {
             return;
         }
 
-        try(Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/monapp", "Jean_Roland", "Papasenegal0"); Statement stm = connection.createStatement()) {
+        try(Connection connection = BaseDeDonnee.seConnecter(); Statement stm = connection.createStatement()) {
             if (profil.isEmpty()) stm.executeUpdate("insert into user(username, code_acces, phone_number) values(\""+ nomutilisateur +"\", \""+ motdepasse1 +"\", "+ numero +");");
             else {}
             stm.executeUpdate("insert into connected_user(user_id)\n" +

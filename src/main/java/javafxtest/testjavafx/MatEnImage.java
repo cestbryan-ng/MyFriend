@@ -19,6 +19,7 @@ public class MatEnImage {
         byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
         System.arraycopy(sourcePixels, 0, targetPixels, 0, sourcePixels.length);
 
+
         return SwingFXUtils.toFXImage(image, null);
     }
 }
