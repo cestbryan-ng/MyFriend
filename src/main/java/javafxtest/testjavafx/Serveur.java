@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 public class Serveur {
     static final Integer NP_PORT = 5454;
 
-    private static final List<DataOutputStream> clients = Collections.synchronizedList(new ArrayList<>());
-    private static final List<String> ip_client = Collections.synchronizedList(new ArrayList<>());
+    static final List<DataOutputStream> clients = Collections.synchronizedList(new ArrayList<>());
+    static final List<String> ip_client = Collections.synchronizedList(new ArrayList<>());
 
     public static void main(String[] args) throws IOException {
         try (ServerSocket serverSocket = new ServerSocket(NP_PORT)) {
@@ -36,7 +36,6 @@ public class Serveur {
         }
 
         public void run() {
-            Scanner scanner = new Scanner(System.in);
             String message;
             String adresse_ip;
 
@@ -107,7 +106,13 @@ public class Serveur {
                         System.out.println("Fichier envoyé à "+ adresse_ip +" : " + nom_fichier);
 
                     } else if (message.equals("video")) {
+                        while (true) {
+                            int length = in.readInt();
+                            byte[] data = new byte[length];
+                            in.readFully(data);
 
+                            System.out.println("trame reçu...");
+                        }
                     }
                 }
 

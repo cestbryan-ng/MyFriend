@@ -7,28 +7,44 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="vbox1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxtest.testjavafx.Page1VideoController">
+<VBox fx:id="vbox1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="410.0" prefWidth="930.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxtest.testjavafx.Page1VideoController">
    <children>
-      <HBox prefHeight="407.0" prefWidth="950.0">
+      <HBox fx:id="hbox2" prefHeight="320.0" prefWidth="950.0">
          <children>
-            <ImageView fx:id="imageview1" fitHeight="407.0" fitWidth="475.0" pickOnBounds="true" preserveRatio="true" />
-            <ImageView fx:id="imageview2" fitHeight="407.0" fitWidth="475.0" pickOnBounds="true" preserveRatio="true" />
+            <ImageView fx:id="imageview1" fitHeight="320.0" fitWidth="440.0" pickOnBounds="true" preserveRatio="true">
+               <HBox.margin>
+                  <Insets right="50.0" />
+               </HBox.margin></ImageView>
+            <ImageView fx:id="imageview2" fitHeight="320.0" fitWidth="440.0" pickOnBounds="true" preserveRatio="true" />
          </children>
          <VBox.margin>
-            <Insets bottom="4.0" />
+            <Insets bottom="5.0" />
          </VBox.margin>
       </HBox>
-      <Button mnemonicParsing="false" onAction="#racrocher">
-         <graphic>
-            <ImageView fitHeight="72.0" fitWidth="71.0" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="@images/raccrocher.png" />
-               </image>
-            </ImageView>
-         </graphic>
-         <VBox.margin>
-            <Insets left="425.0" />
-         </VBox.margin>
-      </Button>
+      <HBox fx:id="hbox1" prefHeight="100.0" prefWidth="200.0">
+         <children>
+            <Button mnemonicParsing="false" onAction="#racrocher">
+               <graphic>
+                  <ImageView fitHeight="72.0" fitWidth="71.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@images/raccrocher.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <HBox.margin>
+                  <Insets left="385.0" />
+               </HBox.margin>
+            </Button>
+            <Button mnemonicParsing="false">
+               <graphic>
+                  <ImageView fitHeight="68.0" fitWidth="128.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@images/cercle.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </Button>
+         </children>
+      </HBox>
    </children>
 </VBox>

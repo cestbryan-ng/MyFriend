@@ -20,11 +20,9 @@ import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.*;
+import java.net.Socket;
 import java.sql.*;
-import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import javafx.scene.layout.VBox;
 
@@ -34,7 +32,12 @@ import java.util.ResourceBundle;
 
 public class Page1Controller implements Initializable {
     static List<String> liste_nom = new ArrayList<>();
-    private String recepteur = "";
+    static String recepteur = "";
+    static String adresse_recepteur;
+    private static final String ADRESSE_SERVEUR = "";
+    static Socket socket;
+    static DataOutputStream out;
+    static DataInputStream in;
 
     @FXML
     private AnchorPane anchorpane1;
@@ -60,10 +63,14 @@ public class Page1Controller implements Initializable {
     @FXML
     private VBox vbox2;
 
+    @FXML
+    private Label enligne;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         new Thread(this::Recevoir).start();
 
+        enligne.setText("");
         vbox1.getChildren().clear();
         vbox2.getChildren().clear();
 
@@ -97,6 +104,14 @@ public class Page1Controller implements Initializable {
 
     @FXML
     void Envoie(ActionEvent event) {
+        if (adresse_recepteur.equals("")) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText("Personne trouvée");
+            alert.setContentText("Choisir une personne");
+            alert.show();
+            return;
+        }
+
         if (message_envoyer.getText().equals("")) return;
 
         try {
@@ -244,13 +259,23 @@ public class Page1Controller implements Initializable {
     }
 
     @FXML
-    void Fermer(ActionEvent event) throws SQLException {
+    void Fermer(ActionEvent event) throws SQLException, IOException {
+        MainPageController.in.close();
+        MainPageController.out.close();
+        MainPageController.socket.close();
+
         Connection  connection = BaseDeDonnee.seConnecter();
         Statement stmt = connection.createStatement();
         stmt.executeUpdate("update connected_user\n" +
                 "set statut = \"offline\"\n" +
                 "where user_id in (\n" +
                 "select user_id from user where username = \""+ MainPageController.nomutilisateur +"\");");
+
+        stmt.executeUpdate("update connected_user\n" +
+                "set last_connection = current_timestamp\n" +
+                "where user_id in\n" +
+                "(select user_id from user where username = \""+ MainPageController.nomutilisateur +"\");");
+
         stmt.close();
         connection.close();
         Stage stage = (Stage) anchorpane1.getScene().getWindow();
@@ -259,6 +284,14 @@ public class Page1Controller implements Initializable {
 
     @FXML
     void Fichier(ActionEvent event) throws IOException {
+        if (adresse_recepteur.equals("")) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText("Personne trouvée");
+            alert.setContentText("Choisir une personne");
+            alert.show();
+            return;
+        }
+
         FileChooser fileChooser = new FileChooser();
         Stage stage = (Stage) anchorpane1.getScene().getWindow();
         File fichier = fileChooser.showOpenDialog(stage);
@@ -273,7 +306,6 @@ public class Page1Controller implements Initializable {
             }
 
             Integer sender_id = 0, recever_id = 0;
-            String adresse_recepteur = "";
             String indice_connexion = "";
 
             try {
@@ -304,15 +336,6 @@ public class Page1Controller implements Initializable {
                     }
                     resultSet3.close();
 
-                    ResultSet resultSet4 = stmt.executeQuery("select adresse_ip from connected_user\n" +
-                            "where user_id in \n" +
-                            "(select user_id from user where username = \""+ recepteur +"\");");
-                    while (resultSet4.next()) {
-                        adresse_recepteur = resultSet4.getString(1);
-                        adresse_recepteur = "/" + adresse_recepteur.split("/")[1];
-                    }
-                    resultSet4.close();
-
                     stmt.executeUpdate("insert into message(sender_id, recever_id, content)\n" +
                             "values (\""+ sender_id +"\", \""+ recever_id +"\", \"Fichier "+ fichier.getName() +"\");");
                 } catch (SQLException e) {
@@ -320,19 +343,25 @@ public class Page1Controller implements Initializable {
                 }
 
                 if (indice_connexion.equals("offline")) {
-                    Label label = new Label();
-                    label.setText("Fichier " + fichier.getName() + " envoyé");
-                    label.setPrefHeight(25);
-                    label.setAlignment(Pos.BASELINE_CENTER);
-                    label.setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
-                    label.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14; -fx-font-weight : bold; -fx-background-color : #e7961c; -fx-background-radius : 20;");
-                    HBox hBox = new HBox();
-                    vbox2.getChildren().add(hBox);
-                    hBox.getChildren().add(label);
-                    hBox.setAlignment(Pos.CENTER_RIGHT);
-                    HBox.setMargin(label, new Insets(10, 0, 0, 10));
-                    message_envoyer.deleteText(0, message_envoyer.getText().length());
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setHeaderText("Oups");
+                    alert.setContentText("Nous ne pouvons pas encore envoyer de fichier à un utilisateur hors ligne");
+                    alert.show();
                     return;
+
+//                    Label label = new Label();
+//                    label.setText("Fichier " + fichier.getName() + " envoyé");
+//                    label.setPrefHeight(25);
+//                    label.setAlignment(Pos.BASELINE_CENTER);
+//                    label.setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
+//                    label.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14; -fx-font-weight : bold; -fx-background-color : #e7961c; -fx-background-radius : 20;");
+//                    HBox hBox = new HBox();
+//                    vbox2.getChildren().add(hBox);
+//                    hBox.getChildren().add(label);
+//                    hBox.setAlignment(Pos.CENTER_RIGHT);
+//                    HBox.setMargin(label, new Insets(10, 0, 0, 10));
+//                    message_envoyer.deleteText(0, message_envoyer.getText().length());
+//                    return;
                 }
 
                 MainPageController.out.writeUTF(adresse_recepteur);
@@ -368,8 +397,43 @@ public class Page1Controller implements Initializable {
 
     @FXML
     void Video(ActionEvent event) throws IOException {
+        String indice_connexion = "offline";
+
+        try (Connection  connection = BaseDeDonnee.seConnecter(); Statement stmt = connection.createStatement()) {
+            ResultSet resultSet1 = stmt.executeQuery("select statut from connected_user\n" +
+                    "where user_id in (\n" +
+                    "select user_id from user\n" +
+                    "where username = \""+ recepteur +"\");");
+            while(resultSet1.next()) {
+                indice_connexion = resultSet1.getString(1);
+            }
+            resultSet1.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (indice_connexion.equals("offline")) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText("Pas possible d'effectuer l'appel");
+            alert.setContentText("L'utilisateur n'est pas en ligne");
+            alert.show();
+            return;
+        }
+
+        try {
+            socket = new Socket(ADRESSE_SERVEUR, ServeurVideo.NP_PORT);
+            in = new DataInputStream(socket.getInputStream());
+            out = new DataOutputStream(socket.getOutputStream());
+        } catch (IOException e) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText("Erreur");
+            alert.setContentText("L'appel n'a pas pu démarrer");
+            alert.show();
+            return;
+        }
+
         FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("Page1Video.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 950, 500);
+        Scene scene = new Scene(fxmlLoader.load(), 950, 410);
         scene.getStylesheets().add(getClass().getResource("Page1VideoUI.css").toExternalForm());
         Stage stage = new Stage();
         stage.setTitle("MonApp");
@@ -385,6 +449,7 @@ public class Page1Controller implements Initializable {
 
         Button button_clique = (Button) event.getSource();
         String indice_de_connexion = "offline";
+        String heure_derniere_connexion = "";
         recepteur = button_clique.getText();
         nom_utilisateur.setText(recepteur);
         Integer self = 0, other = 0;
@@ -415,9 +480,18 @@ public class Page1Controller implements Initializable {
             }
             resultSet3.close();
 
+            ResultSet resultSet5 = stmt.executeQuery("select adresse_ip from connected_user\n" +
+                    "where user_id in \n" +
+                    "(select user_id from user where username = \""+ recepteur +"\");");
+            while (resultSet5.next()) {
+                adresse_recepteur = resultSet5.getString(1);
+                adresse_recepteur = "/" + adresse_recepteur.split("/")[1];
+            }
+            resultSet5.close();
+
             ResultSet resultSet4 = stmt.executeQuery("select sender_id, recever_id, content from message\n" +
-                    "where sender_id = \""+ self +"\" or \""+ other +"\"\n" +
-                    "and recever_id = \""+ self +"\" or \""+ other +"\";");
+                    "where sender_id in ("+ self +", "+ other +")\n" +
+                    "and recever_id in ("+ self +", "+ other +") order by time_send asc;");
             while (resultSet4.next()) {
                 if (self.equals(resultSet4.getInt(1))) {
                     Label label = new Label();
@@ -446,13 +520,30 @@ public class Page1Controller implements Initializable {
             }
             resultSet4.close();
 
+            if (indice_de_connexion.equals("offline")) {
+                stmt.executeUpdate("set lc_time_names = 'fr_FR'; ");
+                ResultSet resultSet6 = stmt.executeQuery("select date_format(last_connection, '%W %H:%i')\n" +
+                        "from connected_user\n" +
+                        "where user_id in\n" +
+                        "(select user_id from user where username = \""+ recepteur +"\");");
+
+                while (resultSet6.next()) {
+                    heure_derniere_connexion = resultSet6.getString(1);
+                }
+                resultSet6.close();
+                enligne.setText("En ligne : " + heure_derniere_connexion);
+            }
+
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
 
-        if (indice_de_connexion.equals("online")) profil_enligne.setImage(new Image(getClass().getResource("images/rondvert.png").toString()));
+        if (indice_de_connexion.equals("online")) {
+            enligne.setText("Actuellement en ligne");
+            profil_enligne.setImage(new Image(getClass().getResource("images/rondvert.png").toString()));
+        }
         else profil_enligne.setImage(new Image(getClass().getResource("images/rondrouge.png").toString()));
     }
 

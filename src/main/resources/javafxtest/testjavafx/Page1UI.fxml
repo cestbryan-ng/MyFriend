@@ -81,19 +81,24 @@
          <children>
             <HBox fx:id="hbox1" prefHeight="66.0" prefWidth="683.0">
                <children>
-                  <Label fx:id="nom_utilisateur" text="Nom utilisateur">
+                  <Label fx:id="nom_utilisateur" prefHeight="19.0" prefWidth="124.0" text="Nom utilisateur...">
                      <HBox.margin>
                         <Insets left="20.0" right="5.0" top="25.0" />
                      </HBox.margin>
                   </Label>
                   <ImageView fx:id="profil_enligne" fitHeight="22.0" fitWidth="11.0" pickOnBounds="true" preserveRatio="true">
                      <HBox.margin>
-                        <Insets right="460.0" top="28.0" />
+                        <Insets right="10.0" top="28.0" />
                      </HBox.margin>
                      <image>
                         <Image url="@images/rondrouge.png" />
                      </image>
                   </ImageView>
+                  <Label fx:id="enligne" prefHeight="17.0" prefWidth="423.0" text="En ligne Mercredi 14:45">
+                     <HBox.margin>
+                        <Insets right="20.0" top="25.0" />
+                     </HBox.margin>
+                  </Label>
                   <Button fx:id="button_appel" mnemonicParsing="false" onAction="#Appel">
                      <graphic>
                         <ImageView fx:id="button_appel" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">

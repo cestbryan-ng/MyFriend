@@ -1,3 +1,15 @@
+#vbox1 {
+    -fx-background-color : "black";
+}
+
+#hbox1 {
+    -fx-background-color : "black";
+}
+
+#hbox2 {
+    -fx-background-color : #434343;
+}
+
 .button {
     -fx-background-color : transparent;
     -fx-cursor : hand;

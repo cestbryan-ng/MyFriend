@@ -62,3 +62,7 @@
     -fx-scale-y: 0.95;
 }
 
+.text-field:hover {
+    -fx-background-color : "white";
+    -fx-text-fill : "black";
+}
