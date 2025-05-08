@@ -7,51 +7,39 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.VBox;
+import javafx.scene.image.Image;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.videoio.VideoCapture;
+
 import javax.sound.sampled.*;
 import java.io.IOException;
 import java.net.URL;
-import javafx.scene.image.Image;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ResourceBundle;
 
-public class Page1VideoController implements Initializable {
+public class Page1AppelController implements Initializable {
 
-    static {
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-    }
+    @FXML
+    private AnchorPane root;
 
-    private static VideoCapture videoCapture;
+    @FXML
+    private Label nom_recepteur;
+
     static boolean encours = false;
     private static TargetDataLine micro;
     private static AudioFormat format = new AudioFormat(44100.0f, 16, 1, true, false);
     private static DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
 
-    @FXML
-    private VBox vbox1;
-
-    @FXML
-    private ImageView imageview1;
-
-    @FXML
-    private ImageView imageview2;
-
-    @FXML
-    private Label message_connexion;
-
     public void initialize(URL location, ResourceBundle resources) {
         new Thread(this::recevoir).start();
+
+        nom_recepteur.setText(Page1Controller.recepteur + "...");
 
         String adresse_recepteur = "";
 
@@ -69,55 +57,26 @@ public class Page1VideoController implements Initializable {
         }
 
         try {
-            Page1Controller.out.writeUTF(adresse_recepteur);
-            Page1Controller.out.writeUTF("video");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        videoCapture = new VideoCapture(0);
-        try {
+            Page1Controller.out_audio.writeUTF(adresse_recepteur);
+            Page1Controller.out_audio.writeUTF("appel");
             micro = (TargetDataLine) AudioSystem.getLine(info);
             micro.open(format);
             micro.start();
-        } catch (LineUnavailableException e) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        catch (LineUnavailableException e) {
             throw new RuntimeException(e);
         }
-        encours = true;
 
-        Mat trame = new Mat();
+        encours = true;
 
         Thread thread = new Thread(() -> {
             byte[] buffer_audio = new byte[4096];
             while (encours) {
-                if (videoCapture.read(trame)) {
-                    Image image = MatEnImage.matToImage(trame);
-
-                    Platform.runLater(() -> {
-                        imageview1.setImage(image);
-                    });
-
-                    MatOfByte buffer = new MatOfByte();
-                    Imgcodecs.imencode(".jpg", trame, buffer);
-                    byte[] data = buffer.toArray();
-
-                    try {
-                        Page1Controller.out.writeInt(data.length);
-                        Page1Controller.out.write(data);
-                        Page1Controller.out.flush();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    try {
-                        Thread.sleep(33);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
                 int bytesRead = micro.read(buffer_audio, 0, buffer_audio.length);
                 try {
-                    Page1Controller.out.write(buffer_audio, 0, bytesRead);
+                    Page1Controller.out_audio.write(buffer_audio, 0, bytesRead);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -125,20 +84,20 @@ public class Page1VideoController implements Initializable {
         });
 
         thread.start();
+
     }
 
     @FXML
-    void racrocher(ActionEvent event) throws IOException {
+    void raccrocher(ActionEvent event) throws IOException {
         encours = false;
-        if (videoCapture.isOpened()) videoCapture.release();
         if (micro.isActive()) {
             micro.stop();
             micro.close();
         }
 
-        Page1Controller.in.close();
-        Page1Controller.out.close();
-        Page1Controller.socket.close();
+        Page1Controller.in_audio.close();
+        Page1Controller.out_audio.close();
+        Page1Controller.socket_audio.close();
 
         FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("Page1UI.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 950, 600);
@@ -147,13 +106,13 @@ public class Page1VideoController implements Initializable {
         stage.setTitle("MonApp");
         stage.setScene(scene);
         stage.show();
-        Stage stage1 = (Stage) vbox1.getScene().getWindow();
+        Stage stage1 = (Stage) root.getScene().getWindow();
         stage1.close();
     }
 
     @FXML
     void recevoir() {
-        byte[] data, buffer;
+        byte[] buffer;
 
         try {
             while (true) {
@@ -161,24 +120,10 @@ public class Page1VideoController implements Initializable {
                 sortie_audio.open(format);
                 sortie_audio.start();
 
-                int length = Page1Controller.in.readInt();
-                data = new byte[length];
-                Page1Controller.in.readFully(data);
                 buffer = new byte[4096];
-                int byte_lue = Page1Controller.in.read(buffer);
+                int byte_lue = Page1Controller.in_audio.read(buffer);
+                nom_recepteur.setText(Page1Controller.recepteur);
                 sortie_audio.write(buffer, 0, byte_lue);
-
-                message_connexion.setText("");
-
-
-                Mat img = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.IMREAD_COLOR);
-                Image fxImage = MatEnImage.matToImage(img);
-
-                Platform.runLater(() -> {
-                    imageview2.setImage(fxImage);
-                    imageview2.setFitHeight(320);
-                    imageview2.setFitWidth(440);
-                });
             }
         } catch (IOException e) {
             e.printStackTrace();

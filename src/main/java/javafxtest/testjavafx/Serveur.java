@@ -45,18 +45,17 @@ public class Serveur {
                 synchronized (clients) {
                     clients.add(out);
                     ip_client.add(this.socket.getInetAddress().toString());
+                    ip_client.set(0, "aa");
                 }
 
                 System.out.println("Liste des clients " + clients + " " + ip_client);
 
                 while (true) {
-
                     adresse_ip = in.readUTF();
-                    if (!(ip_client.contains(adresse_ip))) continue;
                     message = in.readUTF();
                     if (message.equals("message")) {
                         message = in.readUTF();
-                        System.out.println("Message recu : " + message + "à envoyer à l'adresse : " + adresse_ip);
+                        System.out.println("Message recu : " + message);
                         synchronized (clients) {
                             for (int i = 0; i < ip_client.size(); ++i) {
                                 if (ip_client.get(i).equals(adresse_ip)) {
@@ -68,7 +67,6 @@ public class Serveur {
                         }
 
                     } else if (message.equals("fichier")) {
-                        if (!(ip_client.contains(adresse_ip))) continue;
                         String nom_fichier = in.readUTF();
                         Long taille_fichier = in.readLong();
                         FileOutputStream fichier_recu = new FileOutputStream(nom_fichier);

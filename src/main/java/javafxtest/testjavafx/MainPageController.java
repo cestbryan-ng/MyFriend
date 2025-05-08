@@ -21,7 +21,7 @@ import java.io.DataOutputStream;
 import java.io.DataInputStream;
 
 public class MainPageController {
-    private static final String ADRESSE_SERVEUR = "";
+    private static final String ADRESSE_SERVEUR = "localhost";
     static Socket socket;
     static DataOutputStream out;
     static DataInputStream in;
@@ -87,6 +87,7 @@ public class MainPageController {
             message_erreur.setText("Utilisateur introuvable");
 
         } catch (SQLException e) {
+            e.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setHeaderText("Echec de connexion");
             alert.setContentText("Réesayer ultérieurement");

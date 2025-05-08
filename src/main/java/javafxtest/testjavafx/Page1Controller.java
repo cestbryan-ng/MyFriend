@@ -9,10 +9,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.NodeOrientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -28,6 +25,7 @@ import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class Page1Controller implements Initializable {
@@ -38,6 +36,9 @@ public class Page1Controller implements Initializable {
     static Socket socket;
     static DataOutputStream out;
     static DataInputStream in;
+    static Socket socket_audio;
+    static DataInputStream in_audio;
+    static DataOutputStream out_audio;
 
     @FXML
     private AnchorPane anchorpane1;
@@ -97,9 +98,55 @@ public class Page1Controller implements Initializable {
     }
 
     @FXML
-    void Appel(ActionEvent event) {
+    void Appel() throws IOException {
+        String indice_connexion = "offline";
 
+        try (Connection  connection = BaseDeDonnee.seConnecter(); Statement stmt = connection.createStatement()) {
+            ResultSet resultSet1 = stmt.executeQuery("select statut from connected_user\n" +
+                    "where user_id in (\n" +
+                    "select user_id from user\n" +
+                    "where username = \""+ recepteur +"\");");
+            while(resultSet1.next()) {
+                indice_connexion = resultSet1.getString(1);
+            }
+            resultSet1.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
+        if (indice_connexion.equals("offline")) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText("Pas possible d'effectuer l'appel");
+            alert.setContentText("L'utilisateur n'est pas en ligne");
+            alert.show();
+            return;
+        }
+
+        try {
+            socket_audio = new Socket(ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
+            in_audio = new DataInputStream(socket_audio.getInputStream());
+            out_audio = new DataOutputStream(socket_audio.getOutputStream());
+
+            MainPageController.out.writeUTF(adresse_recepteur);
+            MainPageController.out.writeUTF("message");
+            MainPageController.out.writeUTF("123456789abcdefgh=" + MainPageController.nomutilisateur + "=appel");
+        } catch (IOException e) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText("Erreur");
+            alert.setContentText("L'appel n'a pas pu démarrer");
+            alert.show();
+            return;
+        }
+
+        FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("Page1Appel.fxml"));
+        Scene scene = new Scene(fxmlLoader.load(), 300, 300);
+        scene.getStylesheets().add(getClass().getResource("Page1Appel.css").toExternalForm());
+        Stage stage = new Stage();
+        stage.setTitle("MonApp");
+        stage.setScene(scene);
+        stage.show();
+        Stage stage1 = (Stage) anchorpane1.getScene().getWindow();
+        stage1.close();
     }
 
     @FXML
@@ -116,7 +163,7 @@ public class Page1Controller implements Initializable {
 
         try {
             Integer sender_id = 0, recever_id = 0;
-            String indice_connexion = "offline",  adresse_recepteur = "";
+            String indice_connexion = "offline";
 
             try (Connection connection = BaseDeDonnee.seConnecter(); Statement stmt = connection.createStatement()) {
                 ResultSet resultSet1 = stmt.executeQuery("select statut from connected_user\n" +
@@ -143,15 +190,6 @@ public class Page1Controller implements Initializable {
                     recever_id = resultSet3.getInt(1);
                 }
                 resultSet3.close();
-
-                ResultSet resultSet4 = stmt.executeQuery("select adresse_ip from connected_user\n" +
-                        "where user_id in \n" +
-                        "(select user_id from user where username = \""+ recepteur +"\");");
-                while (resultSet4.next()) {
-                        adresse_recepteur = resultSet4.getString(1);
-                        adresse_recepteur = "/" + adresse_recepteur.split("/")[1];
-                }
-                resultSet4.close();
 
                 stmt.executeUpdate("insert into message(sender_id, recever_id, content)\n" +
                         "values (\""+ sender_id +"\", \""+ recever_id +"\", \""+ message_envoyer.getText() +"\");");
@@ -206,11 +244,51 @@ public class Page1Controller implements Initializable {
                     String message_recu = "";
                     try {
                         message_recu = MainPageController.in.readUTF();
-                        System.out.println("Message reçu");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     String finalMessage_recu = message_recu;
+
+                    if (finalMessage_recu.split("=")[0].equals("123456789abcdefgh")) {
+                        if (finalMessage_recu.split("=")[2].equals("video")) {
+                            if (Page1VideoController.encours) continue;
+                            Platform.runLater(() -> {
+                                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                                alert.setHeaderText(finalMessage_recu.split("=")[1] + " vous appelle");
+                                alert.setContentText("Appuyer sur OK pour décrocher");
+                                Optional<ButtonType> result = alert.showAndWait();
+                                if (result.isPresent() && result.get() == ButtonType.OK) {
+                                    recepteur = finalMessage_recu.split("=")[1];
+                                    adresse_recepteur = "rien";
+                                    try {
+                                        Video();
+                                    } catch (IOException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                            });
+                            continue;
+                        } else {
+                            if (Page1AppelController.encours) continue;
+                            Platform.runLater(() -> {
+                                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                                alert.setHeaderText(finalMessage_recu.split("=")[1] + " vous appelle");
+                                alert.setContentText("Appuyer sur OK pour décrocher");
+                                Optional<ButtonType> result = alert.showAndWait();
+                                if (result.isPresent() && result.get() == ButtonType.OK) {
+                                    recepteur = finalMessage_recu.split("=")[1];
+                                    adresse_recepteur = "rien";
+                                    try {
+                                        Appel();
+                                    } catch (IOException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                            });
+                            continue;
+                        }
+                    }
+
                     Platform.runLater(() -> {
                         Label label = new Label();
                         label.setText(finalMessage_recu);
@@ -397,7 +475,7 @@ public class Page1Controller implements Initializable {
     }
 
     @FXML
-    void Video(ActionEvent event) throws IOException {
+    void Video() throws IOException {
         String indice_connexion = "offline";
 
         try (Connection  connection = BaseDeDonnee.seConnecter(); Statement stmt = connection.createStatement()) {
@@ -425,6 +503,10 @@ public class Page1Controller implements Initializable {
             socket = new Socket(ADRESSE_SERVEUR, ServeurVideo.NP_PORT);
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
+
+            MainPageController.out.writeUTF(adresse_recepteur);
+            MainPageController.out.writeUTF("message");
+            MainPageController.out.writeUTF("123456789=video=abcdefgh=" + MainPageController.nomutilisateur + "video");
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setHeaderText("Erreur");

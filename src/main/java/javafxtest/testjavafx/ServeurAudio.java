@@ -5,8 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
 
-public class ServeurVideo {
-    static final Integer NP_PORT = 5455;
+public class ServeurAudio {
+    static final Integer NP_PORT = 5456;
 
     static final List<DataOutputStream> clients = Collections.synchronizedList(new ArrayList<>());
     static final List<String> ip_client = Collections.synchronizedList(new ArrayList<>());
@@ -16,7 +16,7 @@ public class ServeurVideo {
             System.out.println("En attente de connexion : ");
             while (true) {
                 Socket socket = serverSocket.accept();
-                System.out.println("Nouveau client connecté pour la vidéo");
+                System.out.println("Nouveau client connecté pour l'appel");
                 new ClientHandler(socket).start();
             }
 
@@ -48,29 +48,22 @@ public class ServeurVideo {
                     ip_client.set(0, "aaaa");
                 }
 
-                System.out.println("Liste des clients pour les appels vidéo " + clients + " " + ip_client);
+                System.out.println("Liste des clients pour les appels audios " + clients + " " + ip_client);
 
                 while (true) {
                     adresse_ip = in.readUTF();
                     message = in.readUTF();
-                    if (message.equals("video")) {
-                        while (true) {
-                            int length = in.readInt();
-                            byte[] data = new byte[length];
-                            in.readFully(data);
-                            System.out.println("trame reçu...");
-                            byte[] buffer = new byte[4096];
-                            int byte_lue = in.read(buffer);
+                    if (message.equals("appel")) {
+                        byte[] buffer = new byte[4096];
+                        int byte_lue;
+                        while ((byte_lue = in.read(buffer)) != -1) {
                             System.out.println("Audio reçu...");
 
                             synchronized (clients) {
                                 for (int i = 0; i < ip_client.size(); i++) {
                                     if (ip_client.get(i).equals(adresse_ip)) {
-                                        clients.get(i).writeInt(length);
-                                        clients.get(i).write(data);
-                                        clients.get(i).flush();
                                         clients.get(i).write(buffer, 0, byte_lue);
-                                        System.out.println("Trame et audio envoyé à " + adresse_ip);
+                                        System.out.println("Audio envoyé à " + adresse_ip);
                                     }
                                 }
                             }
