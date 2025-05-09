@@ -32,7 +32,7 @@ public class Page1Controller implements Initializable {
     static List<String> liste_nom = new ArrayList<>();
     static String recepteur = "";
     static String adresse_recepteur;
-    private static final String ADRESSE_SERVEUR = "192.168.194.1";
+    private static final String ADRESSE_SERVEUR = "172.20.10.2";
     static Socket socket;
     static DataOutputStream out;
     static DataInputStream in;
@@ -503,6 +503,9 @@ public class Page1Controller implements Initializable {
             socket = new Socket(ADRESSE_SERVEUR, ServeurVideo.NP_PORT);
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
+            socket_audio = new Socket(ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
+            in_audio = new DataInputStream(socket_audio.getInputStream());
+            out_audio = new DataOutputStream(socket_audio.getOutputStream());
 
             MainPageController.out.writeUTF(adresse_recepteur);
             MainPageController.out.writeUTF("message");

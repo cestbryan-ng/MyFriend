@@ -71,6 +71,8 @@ public class Page1VideoController implements Initializable {
         try {
             Page1Controller.out.writeUTF(adresse_recepteur);
             Page1Controller.out.writeUTF("video");
+            Page1Controller.out_audio.writeUTF(adresse_recepteur);
+            Page1Controller.out_audio.writeUTF("appel");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -117,7 +119,7 @@ public class Page1VideoController implements Initializable {
                 }
                 int bytesRead = micro.read(buffer_audio, 0, buffer_audio.length);
                 try {
-                    Page1Controller.out.write(buffer_audio, 0, bytesRead);
+                    Page1Controller.out_audio.write(buffer_audio, 0, bytesRead);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -139,6 +141,9 @@ public class Page1VideoController implements Initializable {
         Page1Controller.in.close();
         Page1Controller.out.close();
         Page1Controller.socket.close();
+        Page1Controller.in_audio.close();
+        Page1Controller.out_audio.close();
+        Page1Controller.socket_audio.close();
 
         FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("Page1UI.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 950, 600);
@@ -165,10 +170,12 @@ public class Page1VideoController implements Initializable {
                 data = new byte[length];
                 Page1Controller.in.readFully(data);
                 buffer = new byte[4096];
-                int byte_lue = Page1Controller.in.read(buffer);
+                int byte_lue = Page1Controller.in_audio.read(buffer);
                 sortie_audio.write(buffer, 0, byte_lue);
 
-                message_connexion.setText("");
+                Platform.runLater(() -> {
+                    message_connexion.setText("");
+                });
 
                 Mat img = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.IMREAD_COLOR);
                 Image fxImage = MatEnImage.matToImage(img);

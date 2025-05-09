@@ -36,7 +36,7 @@ public class ServeurAudio {
 
         public void run() {
             String message;
-            String adresse_ip;
+            String adresse_ip = "";
 
             try {
                 in  = new DataInputStream(socket.getInputStream());

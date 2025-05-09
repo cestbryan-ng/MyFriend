@@ -122,7 +122,9 @@ public class Page1AppelController implements Initializable {
 
                 buffer = new byte[4096];
                 int byte_lue = Page1Controller.in_audio.read(buffer);
-                nom_recepteur.setText(Page1Controller.recepteur);
+                Platform.runLater(() -> {
+                    nom_recepteur.setText(Page1Controller.recepteur);
+                });
                 sortie_audio.write(buffer, 0, byte_lue);
             }
         } catch (IOException e) {

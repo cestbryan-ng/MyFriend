@@ -58,9 +58,6 @@ public class ServeurVideo {
                             byte[] data = new byte[length];
                             in.readFully(data);
                             System.out.println("trame reçu...");
-                            byte[] buffer = new byte[4096];
-                            int byte_lue = in.read(buffer);
-                            System.out.println("Audio reçu...");
 
                             synchronized (clients) {
                                 for (int i = 0; i < ip_client.size(); i++) {
@@ -68,8 +65,6 @@ public class ServeurVideo {
                                         clients.get(i).writeInt(length);
                                         clients.get(i).write(data);
                                         clients.get(i).flush();
-                                        clients.get(i).write(buffer, 0, byte_lue);
-                                        System.out.println("Trame et audio envoyé à " + adresse_ip);
                                     }
                                 }
                             }
