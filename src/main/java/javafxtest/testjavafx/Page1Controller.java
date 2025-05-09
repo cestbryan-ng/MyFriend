@@ -32,7 +32,7 @@ public class Page1Controller implements Initializable {
     static List<String> liste_nom = new ArrayList<>();
     static String recepteur = "";
     static String adresse_recepteur;
-    private static final String ADRESSE_SERVEUR = "";
+    private static final String ADRESSE_SERVEUR = "192.168.194.1";
     static Socket socket;
     static DataOutputStream out;
     static DataInputStream in;
@@ -506,7 +506,7 @@ public class Page1Controller implements Initializable {
 
             MainPageController.out.writeUTF(adresse_recepteur);
             MainPageController.out.writeUTF("message");
-            MainPageController.out.writeUTF("123456789=video=abcdefgh=" + MainPageController.nomutilisateur + "video");
+            MainPageController.out.writeUTF("123456789abcdefgh=" + MainPageController.nomutilisateur + "=video");
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setHeaderText("Erreur");

@@ -19,9 +19,10 @@ import java.sql.ResultSet;
 import java.net.Socket;
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.net.Inet4Address;
 
 public class MainPageController {
-    private static final String ADRESSE_SERVEUR = "localhost";
+    private static final String ADRESSE_SERVEUR = "192.168.194.1";
     static Socket socket;
     static DataOutputStream out;
     static DataInputStream in;
@@ -69,7 +70,7 @@ public class MainPageController {
                     in = new DataInputStream(socket.getInputStream());
                     out = new DataOutputStream(socket.getOutputStream());
                     stm.executeUpdate("update connected_user\n" +
-                            "set adresse_ip = \""+ socket.getInetAddress().toString() +"\"\n" +
+                            "set adresse_ip = \""+ Inet4Address.getLocalHost().toString() +"\"\n" +
                             "where user_id in (\n" +
                             "select user_id from user where username = \""+ nomutilisateur +"\");");
                     FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("Page1UI.fxml"));

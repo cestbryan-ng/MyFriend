@@ -170,7 +170,6 @@ public class Page1VideoController implements Initializable {
 
                 message_connexion.setText("");
 
-
                 Mat img = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.IMREAD_COLOR);
                 Image fxImage = MatEnImage.matToImage(img);
 

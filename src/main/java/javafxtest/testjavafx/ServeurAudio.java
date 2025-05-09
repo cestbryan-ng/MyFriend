@@ -45,7 +45,6 @@ public class ServeurAudio {
                 synchronized (clients) {
                     clients.add(out);
                     ip_client.add(this.socket.getInetAddress().toString());
-                    ip_client.set(0, "aaaa");
                 }
 
                 System.out.println("Liste des clients pour les appels audios " + clients + " " + ip_client);

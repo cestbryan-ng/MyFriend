@@ -3,11 +3,13 @@ package javafxtest.testjavafx;
 import org.junit.jupiter.api.Test;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 class MainPageTest {
 
     @Test
     void main() throws UnknownHostException {
-        System.out.println(Inet4Address.getLocalHost().toString().split("/")[1]);
+        String texte = "a=b=c";
+        System.out.println(Arrays.toString(texte.split("=")));
     }
 }

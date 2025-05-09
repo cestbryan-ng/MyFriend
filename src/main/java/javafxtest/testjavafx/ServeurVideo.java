@@ -45,7 +45,6 @@ public class ServeurVideo {
                 synchronized (clients) {
                     clients.add(out);
                     ip_client.add(this.socket.getInetAddress().toString());
-                    ip_client.set(0, "aaaa");
                 }
 
                 System.out.println("Liste des clients pour les appels vidéo " + clients + " " + ip_client);
