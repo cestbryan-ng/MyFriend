@@ -32,7 +32,7 @@ public class Page1Controller implements Initializable {
     static List<String> liste_nom = new ArrayList<>();
     static String recepteur = "";
     static String adresse_recepteur;
-    private static final String ADRESSE_SERVEUR = "172.20.10.2";
+    private static final String ADRESSE_SERVEUR = "localhost";
     static Socket socket;
     static DataOutputStream out;
     static DataInputStream in;

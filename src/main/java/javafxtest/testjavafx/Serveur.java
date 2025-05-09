@@ -45,6 +45,7 @@ public class Serveur {
                 synchronized (clients) {
                     clients.add(out);
                     ip_client.add(this.socket.getInetAddress().toString());
+                    ip_client.set(0, "aa");
                 }
 
                 System.out.println("Liste des clients " + clients + " " + ip_client);

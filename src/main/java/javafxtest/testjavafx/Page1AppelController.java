@@ -7,12 +7,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.imgcodecs.Imgcodecs;
 
 import javax.sound.sampled.*;
 import java.io.IOException;
@@ -112,21 +108,21 @@ public class Page1AppelController implements Initializable {
 
     @FXML
     void recevoir() {
-        byte[] buffer;
+        Platform.runLater(() -> {
+            nom_recepteur.setText(Page1Controller.recepteur);
+        });
 
         try {
-            while (true) {
-                SourceDataLine sortie_audio = AudioSystem.getSourceDataLine(format);
-                sortie_audio.open(format);
-                sortie_audio.start();
+            SourceDataLine sortie_audio = AudioSystem.getSourceDataLine(format);
+            sortie_audio.open(format);
+            sortie_audio.start();
 
-                buffer = new byte[4096];
-                int byte_lue = Page1Controller.in_audio.read(buffer);
-                Platform.runLater(() -> {
-                    nom_recepteur.setText(Page1Controller.recepteur);
-                });
+            int byte_lue;
+            byte[] buffer = new byte[4096];
+            while ((byte_lue = Page1Controller.in_audio.read(buffer)) != -1) {
                 sortie_audio.write(buffer, 0, byte_lue);
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         } catch (LineUnavailableException e) {
