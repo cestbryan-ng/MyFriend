@@ -65,6 +65,7 @@ public class ServeurVideo {
                                         clients.get(i).writeInt(length);
                                         clients.get(i).write(data);
                                         clients.get(i).flush();
+                                        System.out.println("trame envoyé à : " + adresse_ip);
                                     }
                                 }
                             }

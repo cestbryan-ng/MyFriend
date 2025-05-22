@@ -53,6 +53,7 @@ public class Page1VideoController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         new Thread(this::recevoir).start();
 
+        encours = true;
         String adresse_recepteur = "";
 
         try (Connection connection = BaseDeDonnee.seConnecter(); Statement stmt = connection.createStatement()) {
@@ -85,12 +86,11 @@ public class Page1VideoController implements Initializable {
         } catch (LineUnavailableException e) {
             throw new RuntimeException(e);
         }
-        encours = true;
 
         Mat trame = new Mat();
 
         Thread thread = new Thread(() -> {
-            byte[] buffer_audio = new byte[2048];
+            byte[] buffer_audio = new byte[4096];
             while (encours) {
                 if (videoCapture.read(trame)) {
                     Image image = MatEnImage.matToImage(trame);
@@ -159,10 +159,7 @@ public class Page1VideoController implements Initializable {
 
     @FXML
     void recevoir() {
-        byte[] data, buffer;
-        Platform.runLater(() -> {
-            message_connexion.setText("");
-        });
+        byte[] data = null;
 
         try {
             SourceDataLine sortie_audio = AudioSystem.getSourceDataLine(format);
@@ -173,7 +170,8 @@ public class Page1VideoController implements Initializable {
                 int length = Page1Controller.in.readInt();
                 data = new byte[length];
                 Page1Controller.in.readFully(data);
-                buffer = new byte[2048];
+
+                byte[] buffer = new byte[4096];
                 int byte_lue = Page1Controller.in_audio.read(buffer);
                 sortie_audio.write(buffer, 0, byte_lue);
 
