@@ -117,6 +117,7 @@ public class Page1VideoController implements Initializable {
                         throw new RuntimeException(e);
                     }
                 }
+
                 int bytesRead = micro.read(buffer_audio, 0, buffer_audio.length);
                 try {
                     Page1Controller.out_audio.write(buffer_audio, 0, bytesRead);

@@ -22,7 +22,7 @@ import java.io.DataInputStream;
 import java.net.Inet4Address;
 
 public class MainPageController {
-    private static final String ADRESSE_SERVEUR = "localhost";
+    private static final String ADRESSE_SERVEUR = "172.20.10.3";
     static Socket socket;
     static DataOutputStream out;
     static DataInputStream in;
@@ -44,7 +44,7 @@ public class MainPageController {
     private AnchorPane anchorpane1;
 
     @FXML
-    void Connexion(ActionEvent event) throws IOException {
+    void Connexion(ActionEvent event) {
         nomutilisateur = nom_utilisateur.getText();
         String motdepasse = mot_de_passe_utilisateur.getText();
         message_erreur.setStyle("-fx-text-fill : red");
@@ -87,7 +87,7 @@ public class MainPageController {
             }
             message_erreur.setText("Utilisateur introuvable");
 
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             e.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setHeaderText("Echec de connexion");

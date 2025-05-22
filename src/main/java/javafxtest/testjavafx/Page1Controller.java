@@ -31,8 +31,8 @@ import java.util.ResourceBundle;
 public class Page1Controller implements Initializable {
     static List<String> liste_nom = new ArrayList<>();
     static String recepteur = "";
-    static String adresse_recepteur;
-    private static final String ADRESSE_SERVEUR = "localhost";
+    static String adresse_recepteur = "";
+    private static final String ADRESSE_SERVEUR = "172.20.10.3";
     static Socket socket;
     static DataOutputStream out;
     static DataInputStream in;
@@ -42,9 +42,6 @@ public class Page1Controller implements Initializable {
 
     @FXML
     private AnchorPane anchorpane1;
-
-    @FXML
-    private Button button_test1;
 
     @FXML
     private TextField message_envoyer;
@@ -99,6 +96,14 @@ public class Page1Controller implements Initializable {
 
     @FXML
     void Appel() throws IOException {
+        if (adresse_recepteur.equals("")) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText("Personne trouvée");
+            alert.setContentText("Choisir une personne");
+            alert.show();
+            return;
+        }
+
         String indice_connexion = "offline";
 
         try (Connection  connection = BaseDeDonnee.seConnecter(); Statement stmt = connection.createStatement()) {
@@ -301,6 +306,7 @@ public class Page1Controller implements Initializable {
                         hBox.getChildren().add(label);
                         HBox.setMargin(label, new Insets(10, 0, 0, 10));
                     });
+
                 } else if (type_envoe.equals("fichier")) {
                     String nom_fichier = MainPageController.in.readUTF();
                     long taille_fichier = MainPageController.in.readLong();
@@ -338,7 +344,7 @@ public class Page1Controller implements Initializable {
     }
 
     @FXML
-    void Fermer(ActionEvent event) throws SQLException, IOException {
+    void Fermer() throws SQLException, IOException {
         MainPageController.in.close();
         MainPageController.out.close();
         MainPageController.socket.close();
@@ -476,6 +482,14 @@ public class Page1Controller implements Initializable {
 
     @FXML
     void Video() throws IOException {
+        if (adresse_recepteur.equals("")) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText("Personne trouvée");
+            alert.setContentText("Choisir une personne");
+            alert.show();
+            return;
+        }
+
         String indice_connexion = "offline";
 
         try (Connection  connection = BaseDeDonnee.seConnecter(); Statement stmt = connection.createStatement()) {
@@ -608,7 +622,7 @@ public class Page1Controller implements Initializable {
 
             if (indice_de_connexion.equals("offline")) {
                 stmt.executeUpdate("set lc_time_names = 'fr_FR'; ");
-                ResultSet resultSet6 = stmt.executeQuery("select date_format(last_connection, '%W %H:%i')\n" +
+                ResultSet resultSet6 = stmt.executeQuery("select date_format(last_connection, '%d/%m/%Y à %H:%i')\n" +
                         "from connected_user\n" +
                         "where user_id in\n" +
                         "(select user_id from user where username = \""+ recepteur +"\");");
