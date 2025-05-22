@@ -159,19 +159,19 @@ public class Page1VideoController implements Initializable {
 
     @FXML
     void recevoir() {
-        byte[] data = null;
+        byte[] data = null; byte[] buffer = null;
 
         try {
-            SourceDataLine sortie_audio = AudioSystem.getSourceDataLine(format);
-            sortie_audio.open(format);
-            sortie_audio.start();
-
             while (encours) {
+                SourceDataLine sortie_audio = AudioSystem.getSourceDataLine(format);
+                sortie_audio.open(format);
+                sortie_audio.start();
+
                 int length = Page1Controller.in.readInt();
                 data = new byte[length];
                 Page1Controller.in.readFully(data);
 
-                byte[] buffer = new byte[4096];
+                buffer = new byte[4096];
                 int byte_lue = Page1Controller.in_audio.read(buffer);
                 sortie_audio.write(buffer, 0, byte_lue);
 

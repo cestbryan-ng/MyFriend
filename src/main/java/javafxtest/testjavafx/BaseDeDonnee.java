@@ -6,7 +6,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class BaseDeDonnee {
-    private static String adresse_bd = "jdbc:mysql://localhost:3306/monapp";
+    private static String adresse_bd = "jdbc:mysql://192.168.6.1:3306/monapp";
     private static String nom_util = "Jean_Roland";
     private static String mot_de_passe = "Papasenegal0";
 

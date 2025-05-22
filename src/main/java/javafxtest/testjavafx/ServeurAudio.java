@@ -53,7 +53,7 @@ public class ServeurAudio {
                     adresse_ip = in.readUTF();
                     message = in.readUTF();
                     if (message.equals("appel")) {
-                        byte[] buffer = new byte[2048];
+                        byte[] buffer = new byte[4096];
                         int byte_lue;
                         while ((byte_lue = in.read(buffer)) != -1) {
                             System.out.println("Audio reçu...");

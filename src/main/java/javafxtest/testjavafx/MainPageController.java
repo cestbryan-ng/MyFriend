@@ -22,7 +22,7 @@ import java.io.DataInputStream;
 import java.net.Inet4Address;
 
 public class MainPageController {
-    private static final String ADRESSE_SERVEUR = "localhost";
+    private static final String ADRESSE_SERVEUR = "192.168.6.1";
     static Socket socket;
     static DataOutputStream out;
     static DataInputStream in;
