@@ -24,15 +24,16 @@ import java.io.DataInputStream;
 import java.net.Inet4Address;
 
 public class MainPageController {
-    private static final String ADRESSE_SERVEUR = "localhost";
+    static final String ADRESSE_SERVEUR = "192.168.1.101";
     static Socket socket;
     static DataOutputStream out;
     static DataInputStream in;
     static String nomutilisateur;
     static String adresse_utilisateur;
     static String adresse_recepteur;
-    static String adressre_recepteur2;
+    static String adressre_recepteur_audio;
     static String recepteur;
+    static String recepteur_audio;
     static String enligne;
 
     @FXML

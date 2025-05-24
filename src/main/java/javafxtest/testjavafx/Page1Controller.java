@@ -137,6 +137,38 @@ public class Page1Controller implements Initializable {
 
     @FXML
     void Appel() throws IOException {
+        if (MainPageController.enligne.equals("offline")) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText("Pas possible d'effectuer l'appel");
+            alert.setContentText("L'utilisateur n'est pas en ligne");
+            alert.show();
+            return;
+        }
+
+        try {
+            socket_audio = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
+            in_audio = new DataInputStream(socket_audio.getInputStream());
+            out_audio = new DataOutputStream(socket_audio.getOutputStream());
+
+            MainPageController.out.writeUTF(MainPageController.adresse_utilisateur);
+            MainPageController.out.writeUTF(MainPageController.adresse_recepteur);
+            MainPageController.out.writeUTF(MainPageController.nomutilisateur);
+            MainPageController.out.writeUTF("audio");
+        } catch (IOException e) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText("Erreur");
+            alert.setContentText("L'appel n'a pas pu démarrer");
+            alert.show();
+            return;
+        }
+
+        FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("Page1Appel.fxml"));
+        Scene scene = new Scene(fxmlLoader.load(), 196, 330);
+        scene.getStylesheets().add(getClass().getResource("Page1Appel.css").toExternalForm());
+        Stage stage = new Stage();
+        stage.setTitle("MonApp");
+        stage.setScene(scene);
+        stage.show();
     }
 
     @FXML
@@ -228,7 +260,7 @@ public class Page1Controller implements Initializable {
     @FXML
     void Recevoir() {
         while (true) {
-            String adresse_recepteur = "", nom_recepteur = "",type_envoie = "";
+            String adresse_recepteur, nom_recepteur, type_envoie;
             Integer self = 0, other = 0;
 
             try {
@@ -241,16 +273,18 @@ public class Page1Controller implements Initializable {
 
             if (type_envoie.equals("message_fichier")) {
                 if ((!MainPageController.adresse_recepteur.equals(adresse_recepteur))) {
-                    Label label = new Label();
-                    label.setText(nom_recepteur + "vous a écrit");
-                    label.setPadding(new Insets(10, 0, 10, 0));
-                    label.setStyle("-fx-text-fill : \"white\"; -fx-font-family : \"Cambria Math\"; -fx-font-size : 14;");
-                    vbox1.getChildren().add(0, label);
-
-                    PauseTransition delay = new PauseTransition(Duration.seconds(5));
-                    delay.setOnFinished(e -> vbox1.getChildren().remove(label));
-                    delay.play();
+                    Platform.runLater(() -> {
+                        Label label = new Label();
+                        label.setText(nom_recepteur + " vous a écrit");
+                        label.setPadding(new Insets(40, 0, 40, 0));
+                        label.setStyle("-fx-text-fill : \"white\"; -fx-font-family : \"Cambria Math\"; -fx-font-size : 14;");
+                        vbox1.getChildren().add(0, label);
+                        PauseTransition delay = new PauseTransition(Duration.seconds(5));
+                        delay.setOnFinished(e -> vbox1.getChildren().remove(label));
+                        delay.play();
+                    });
                 } else {
+                    Platform.runLater(() -> vbox2.getChildren().clear());
                     try (Connection  connection = BaseDeDonnee.seConnecter(); Statement stmt = connection.createStatement()) {
                         List<Object> liste = Select.elements(MainPageController.recepteur);
                         self = (Integer) liste.get(1);
@@ -259,111 +293,157 @@ public class Page1Controller implements Initializable {
                                 "where sender_id in (" + self + ", " + other + ")\n" +
                                 "and recever_id in (" + self + ", " + other + ") order by time_send asc;");
                         while (resultSet.next()) {
+                            String message = resultSet.getString(3), date = resultSet.getString(4);
                             if (self.equals(resultSet.getInt(1))) {
                                 if (resultSet.getBinaryStream(5) == null) {
-                                    Label label1 = new Label();
-                                    label1.setText(resultSet.getString(3));
-                                    label1.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
-                                    label1.setPadding(new Insets(5, 8, 7, 8));
-                                    Label label2 = new Label();
-                                    label2.setText(resultSet.getString(4));
-                                    label2.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 10;");
-                                    label2.setPadding(new Insets(0, 8, 5, 8));
-                                    VBox vBox = new VBox();
-                                    vBox.getChildren().add(label1);
-                                    vBox.getChildren().add(label2);
-                                    vBox.setAlignment(Pos.CENTER_RIGHT);
-                                    vBox.setStyle("-fx-background-color : \"#67fd30\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
-                                    HBox hBox = new HBox();
-                                    vbox2.getChildren().add(hBox);
-                                    hBox.getChildren().add(vBox);
-                                    hBox.setAlignment(Pos.CENTER_RIGHT);
-                                    HBox.setMargin(vBox, new Insets(5, 0, 0, 0));
+                                    Platform.runLater(() -> {
+                                        Label label1 = new Label();
+                                        label1.setText(message);
+                                        label1.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
+                                        label1.setPadding(new Insets(5, 8, 7, 8));
+                                        Label label2 = new Label();
+                                        label2.setText(date);
+                                        label2.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 10;");
+                                        label2.setPadding(new Insets(0, 8, 5, 8));
+                                        VBox vBox = new VBox();
+                                        vBox.getChildren().add(label1);
+                                        vBox.getChildren().add(label2);
+                                        vBox.setAlignment(Pos.CENTER_RIGHT);
+                                        vBox.setStyle("-fx-background-color : \"#67fd30\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
+                                        HBox hBox = new HBox();
+                                        vbox2.getChildren().add(hBox);
+                                        hBox.getChildren().add(vBox);
+                                        hBox.setAlignment(Pos.CENTER_RIGHT);
+                                        HBox.setMargin(vBox, new Insets(5, 0, 0, 0));
+                                    });
+
                                 } else {
-                                    Button button = new Button();
-                                    button.setText(resultSet.getString(3));
-                                    button.setMnemonicParsing(false);
-                                    button.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
-                                    button.setPadding(new Insets(5, 8, 7, 8));
-                                    button.setOnAction(e -> ouvrir(e));
-                                    ImageView imageView = new ImageView(new Image(getClass().getResource("images/dossier.png").toString()));
-                                    imageView.setFitWidth(28);
-                                    imageView.setFitHeight(19);
-                                    imageView.setPreserveRatio(true);
-                                    imageView.setPickOnBounds(true);
-                                    button.setGraphic(imageView);
-                                    Label label2 = new Label();
-                                    label2.setText(resultSet.getString(4));
-                                    label2.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 10;");
-                                    label2.setPadding(new Insets(0, 8, 5, 8));
-                                    VBox vBox = new VBox();
-                                    vBox.getChildren().add(button);
-                                    vBox.getChildren().add(label2);
-                                    vBox.setAlignment(Pos.CENTER_RIGHT);
-                                    vBox.setStyle("-fx-background-color : \"#67fd30\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
-                                    HBox hBox = new HBox();
-                                    vbox2.getChildren().add(hBox);
-                                    hBox.getChildren().add(vBox);
-                                    hBox.setAlignment(Pos.CENTER_RIGHT);
-                                    HBox.setMargin(vBox, new Insets(5, 0, 0, 0));
+                                    Platform.runLater(() -> {
+                                        Button button = new Button();
+                                        button.setText(message);
+                                        button.setMnemonicParsing(false);
+                                        button.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
+                                        button.setPadding(new Insets(5, 8, 7, 8));
+                                        button.setOnAction(e -> ouvrir(e));
+                                        ImageView imageView = new ImageView(new Image(getClass().getResource("images/dossier.png").toString()));
+                                        imageView.setFitWidth(28);
+                                        imageView.setFitHeight(19);
+                                        imageView.setPreserveRatio(true);
+                                        imageView.setPickOnBounds(true);
+                                        button.setGraphic(imageView);
+                                        Label label2 = new Label();
+                                        label2.setText(date);
+                                        label2.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 10;");
+                                        label2.setPadding(new Insets(0, 8, 5, 8));
+                                        VBox vBox = new VBox();
+                                        vBox.getChildren().add(button);
+                                        vBox.getChildren().add(label2);
+                                        vBox.setAlignment(Pos.CENTER_RIGHT);
+                                        vBox.setStyle("-fx-background-color : \"#67fd30\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
+                                        HBox hBox = new HBox();
+                                        vbox2.getChildren().add(hBox);
+                                        hBox.getChildren().add(vBox);
+                                        hBox.setAlignment(Pos.CENTER_RIGHT);
+                                        HBox.setMargin(vBox, new Insets(5, 0, 0, 0));
+                                    });
                                 }
                             } else {
                                 if (resultSet.getBinaryStream(5) == null) {
-                                    Label label1 = new Label();
-                                    label1.setText(resultSet.getString(3));
-                                    label1.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
-                                    label1.setPadding(new Insets(5, 8, 7, 8));
-                                    Label label2 = new Label();
-                                    label2.setText(resultSet.getString(4));
-                                    label2.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 10;");
-                                    label2.setPadding(new Insets(0, 8, 5, 8));
-                                    VBox vBox = new VBox();
-                                    vBox.getChildren().add(label1);
-                                    vBox.getChildren().add(label2);
-                                    vBox.setAlignment(Pos.CENTER_RIGHT);
-                                    vBox.setStyle("-fx-background-color : \"#e7961c\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
-                                    HBox hBox = new HBox();
-                                    vbox2.getChildren().add(hBox);
-                                    hBox.getChildren().add(vBox);
-                                    HBox.setMargin(vBox, new Insets(5, 0, 0, 0));
+                                    Platform.runLater(() -> {
+                                        Label label1 = new Label();
+                                        label1.setText(message);
+                                        label1.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
+                                        label1.setPadding(new Insets(5, 8, 7, 8));
+                                        Label label2 = new Label();
+                                        label2.setText(date);
+                                        label2.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 10;");
+                                        label2.setPadding(new Insets(0, 8, 5, 8));
+                                        VBox vBox = new VBox();
+                                        vBox.getChildren().add(label1);
+                                        vBox.getChildren().add(label2);
+                                        vBox.setAlignment(Pos.CENTER_RIGHT);
+                                        vBox.setStyle("-fx-background-color : \"#e7961c\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
+                                        HBox hBox = new HBox();
+                                        vbox2.getChildren().add(hBox);
+                                        hBox.getChildren().add(vBox);
+                                        HBox.setMargin(vBox, new Insets(5, 0, 0, 0));
+                                    });
+
                                 } else {
-                                    Button button = new Button();
-                                    button.setText(resultSet.getString(3));
-                                    button.setMnemonicParsing(false);
-                                    button.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
-                                    button.setPadding(new Insets(5, 8, 7, 8));
-                                    button.setOnAction(e -> ouvrir(e));
-                                    ImageView imageView = new ImageView(new Image(getClass().getResource("images/dossier.png").toString()));
-                                    imageView.setFitWidth(28);
-                                    imageView.setFitHeight(19);
-                                    imageView.setPreserveRatio(true);
-                                    imageView.setPickOnBounds(true);
-                                    button.setGraphic(imageView);
-                                    Label label2 = new Label();
-                                    label2.setText(resultSet.getString(4));
-                                    label2.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 10;");
-                                    label2.setPadding(new Insets(0, 8, 5, 8));
-                                    VBox vBox = new VBox();
-                                    vBox.getChildren().add(button);
-                                    vBox.getChildren().add(label2);
-                                    vBox.setAlignment(Pos.CENTER_RIGHT);
-                                    vBox.setStyle("-fx-background-color : \"#e7961c\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
-                                    HBox hBox = new HBox();
-                                    vbox2.getChildren().add(hBox);
-                                    hBox.getChildren().add(vBox);
-                                    HBox.setMargin(vBox, new Insets(5, 0, 0, 0));
+                                    Platform.runLater(() -> {
+                                        Button button = new Button();
+                                        button.setText(message);
+                                        button.setMnemonicParsing(false);
+                                        button.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
+                                        button.setPadding(new Insets(5, 8, 7, 8));
+                                        button.setOnAction(e -> ouvrir(e));
+                                        ImageView imageView = new ImageView(new Image(getClass().getResource("images/dossier.png").toString()));
+                                        imageView.setFitWidth(28);
+                                        imageView.setFitHeight(19);
+                                        imageView.setPreserveRatio(true);
+                                        imageView.setPickOnBounds(true);
+                                        button.setGraphic(imageView);
+                                        Label label2 = new Label();
+                                        label2.setText(date);
+                                        label2.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 10;");
+                                        label2.setPadding(new Insets(0, 8, 5, 8));
+                                        VBox vBox = new VBox();
+                                        vBox.getChildren().add(button);
+                                        vBox.getChildren().add(label2);
+                                        vBox.setAlignment(Pos.CENTER_RIGHT);
+                                        vBox.setStyle("-fx-background-color : \"#e7961c\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
+                                        HBox hBox = new HBox();
+                                        vbox2.getChildren().add(hBox);
+                                        hBox.getChildren().add(vBox);
+                                        HBox.setMargin(vBox, new Insets(5, 0, 0, 0));
+                                    });
                                 }
                             }
                         }
                         resultSet.close();
                     } catch (SQLException e) {
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setHeaderText("Echec de chargement");
-                        alert.setContentText("Nous n'arrivons pas à charger un message reçu.");
-                        alert.show();
-                        continue;
+                        Platform.runLater(() -> {
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setHeaderText("Echec de chargement");
+                            alert.setContentText("Nous n'arrivons pas à charger un message reçu.");
+                            alert.show();
+                        });
                     }
                 }
+            } else if (type_envoie.equals("audio")) {
+                MainPageController.recepteur_audio = nom_recepteur;
+                MainPageController.adressre_recepteur_audio = adresse_recepteur;
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setHeaderText(nom_recepteur+ " vous appelle");
+                    alert.setContentText("Appuyer sur OK pour décrocher");
+                    Optional<ButtonType> result = alert.showAndWait();
+                    if (result.isPresent() && result.get() == ButtonType.OK) {
+                        try {
+                            socket_audio = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
+                            in_audio = new DataInputStream(socket_audio.getInputStream());
+                            out_audio = new DataOutputStream(socket_audio.getOutputStream());
+
+                            MainPageController.out.writeUTF(MainPageController.adresse_utilisateur);
+                            MainPageController.out.writeUTF(adresse_recepteur);
+                            MainPageController.out.writeUTF(MainPageController.nomutilisateur);
+                            MainPageController.out.writeUTF("audio");
+
+                            FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("Page1Appel.fxml"));
+                            Scene scene = new Scene(fxmlLoader.load(), 196, 330);
+                            scene.getStylesheets().add(getClass().getResource("Page1Appel.css").toExternalForm());
+                            Stage stage = new Stage();
+                            stage.setTitle("MonApp");
+                            stage.setScene(scene);
+                            stage.show();
+                        } catch (IOException e) {
+                            Alert alert1 = new Alert(Alert.AlertType.INFORMATION);
+                            alert1.setHeaderText("Erreur");
+                            alert1.setContentText("L'appel n'a pas pu démarrer");
+                            alert1.show();
+                        }
+                    }
+                });
             }
 
 //            if (type_envoe.equals("message")) {

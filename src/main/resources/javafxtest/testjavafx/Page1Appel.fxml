@@ -6,22 +6,23 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane fx:id="root" prefHeight="300.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxtest.testjavafx.Page1AppelController">
+<AnchorPane fx:id="root" prefHeight="330.0" prefWidth="196.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxtest.testjavafx.Page1AppelController">
    <children>
-      <Label fx:id="nom_recepteur" layoutX="114.0" layoutY="29.0" />
-      <ImageView fitHeight="132.0" fitWidth="183.0" layoutX="90.0" layoutY="73.0" pickOnBounds="true" preserveRatio="true">
+      <Label fx:id="nom_recepteur" layoutX="60.0" layoutY="8.0" text="Batman" />
+      <ImageView fitHeight="132.0" fitWidth="183.0" layoutX="29.0" layoutY="87.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@images/appel-telephonique1.png" />
          </image>
       </ImageView>
-      <Button layoutX="118.0" layoutY="218.0" mnemonicParsing="false" onAction="#raccrocher" prefHeight="44.0" prefWidth="66.0">
+      <Button layoutX="45.0" layoutY="227.0" mnemonicParsing="false" onAction="#raccrocher" prefHeight="80.0" prefWidth="102.0">
          <graphic>
-            <ImageView fitHeight="60.0" fitWidth="68.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fitHeight="67.0" fitWidth="73.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@images/raccrocher.png" />
                </image>
             </ImageView>
          </graphic>
       </Button>
+      <Label fx:id="temps" layoutX="84.0" layoutY="45.0" text="0:0" />
    </children>
 </AnchorPane>

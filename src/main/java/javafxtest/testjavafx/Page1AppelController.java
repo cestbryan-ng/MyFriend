@@ -19,23 +19,36 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ResourceBundle;
 
-public class Page1AppelController  {
-//
-//    @FXML
-//    private AnchorPane root;
-//
-//    @FXML
-//    private Label nom_recepteur;
-//
-//    static boolean encours = false;
-//    private static TargetDataLine micro;
-//    private static AudioFormat format = new AudioFormat(44100.0f, 16, 1, true, false);
-//    private static DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
-//
-//    public void initialize(URL location, ResourceBundle resources) {
-//        new Thread(this::recevoir).start();
-//
-//        nom_recepteur.setText(Page1Controller.recepteur + "...");
+public class Page1AppelController implements Initializable  {
+
+    @FXML
+    private AnchorPane root;
+
+    @FXML
+    private Label nom_recepteur;
+
+    @FXML
+    private Label temps;
+
+    static boolean encours = false;
+    private static TargetDataLine micro;
+    private static AudioFormat format = new AudioFormat(44100.0f, 16, 1, true, false);
+    private static DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
+
+    public void initialize(URL location, ResourceBundle resources) {
+        new Thread(this::recevoir).start();
+        encours = true;
+
+        try {
+            Page1Controller.out_audio.writeUTF(MainPageController.adressre_recepteur_audio);
+            while (encours) {
+                Platform.runLater(() -> nom_recepteur.setText(MainPageController.recepteur_audio));
+                Page1Controller.out_audio.writeUTF("a");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 //
 //        String adresse_recepteur = "";
 //
@@ -80,38 +93,72 @@ public class Page1AppelController  {
 //        });
 //
 //        thread.start();
-//
-//    }
-//
-//    @FXML
-//    void raccrocher(ActionEvent event) throws IOException {
-//        encours = false;
-//        if (micro.isActive()) {
-//            micro.stop();
-//            micro.close();
-//        }
-//
-//        Page1Controller.in_audio.close();
-//        Page1Controller.out_audio.close();
-//        Page1Controller.socket_audio.close();
-//
-//        FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("Page1UI.fxml"));
-//        Scene scene = new Scene(fxmlLoader.load(), 950, 600);
-//        scene.getStylesheets().add(getClass().getResource("Page1UI.css").toExternalForm());
-//        Stage stage = new Stage();
-//        stage.setTitle("MonApp");
-//        stage.setScene(scene);
-//        stage.show();
-//        Stage stage1 = (Stage) root.getScene().getWindow();
-//        stage1.close();
-//    }
-//
-//    @FXML
-//    void recevoir() {
+
+    }
+
+    @FXML
+    void raccrocher(ActionEvent event) throws IOException {
+        encours = false;
+        if (micro.isActive()) {
+            micro.stop();
+            micro.close();
+        }
+
+        Page1Controller.in_audio.close();
+        Page1Controller.out_audio.close();
+        Page1Controller.socket_audio.close();
+
+        Stage stage1 = (Stage) root.getScene().getWindow();
+        stage1.close();
+    }
+
+    @FXML
+    void recevoir() {
+        String message;
+
+        Thread thread = new Thread(() -> {
+            Integer minute = 0, seconde = 0;
+
+            while (encours) {
+                if (seconde == 60) {
+                    seconde = 1;
+                    minute++;
+                    Integer finalMinute = minute, finalSeconde = seconde;
+                    Platform.runLater(() -> {
+                        temps.setText(finalMinute + " : " + finalSeconde);
+                    });
+                } else {
+                    Integer finalMinute1 = minute, finalSeconde1 = seconde;
+                    Platform.runLater(() -> {
+                        temps.setText(finalMinute1 + " : " + finalSeconde1);
+                    });
+                    seconde++;
+                }
+                Platform.runLater(() -> {
+                    temps.setText("00:01");
+                });
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        while (true) {
+            try {
+                message = Page1Controller.in_audio.readUTF();
+            } catch (IOException e) {
+                break;
+            }
+            thread.start();
+        }
+
 //        Platform.runLater(() -> {
 //            nom_recepteur.setText(Page1Controller.recepteur);
 //        });
-//
+////
 //        try {
 //            SourceDataLine sortie_audio = AudioSystem.getSourceDataLine(format);
 //            sortie_audio.open(format);
@@ -128,6 +175,6 @@ public class Page1AppelController  {
 //        } catch (LineUnavailableException e) {
 //            throw new RuntimeException(e);
 //        }
-//    }
+    }
 
 }

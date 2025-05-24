@@ -21,7 +21,19 @@ class MainPageTest {
         System.out.println(dateformat);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
+        Integer minute = 0, seconde = 0;
+        while (true) {
+            if (seconde == 60) {
+                seconde = 1;
+                minute++;
+                System.out.println(minute + " : 0" );
+            } else {
+                System.out.println(minute + ":" + seconde);
+                seconde++;
+            }
 
+            Thread.sleep(1000);
+        }
     }
 }

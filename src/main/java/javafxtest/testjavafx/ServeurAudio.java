@@ -47,26 +47,36 @@ public class ServeurAudio {
                     ip_client.add(this.socket.getInetAddress().toString());
                 }
 
-                System.out.println("Liste des clients pour les appels audios " + clients + " " + ip_client);
+                System.out.println("Liste des clients pour les appels audios : " + clients + " " + ip_client);
 
                 while (true) {
                     adresse_ip = in.readUTF();
-                    message = in.readUTF();
-                    if (message.equals("appel")) {
-                        byte[] buffer = new byte[4096];
-                        int byte_lue;
-                        while ((byte_lue = in.read(buffer)) != -1) {
-                            System.out.println("Audio reçu...");
-                            synchronized (clients) {
-                                for (int i = 0; i < ip_client.size(); i++) {
-                                    if (ip_client.get(i).equals(adresse_ip)) {
-                                        clients.get(i).write(buffer, 0, byte_lue);
-                                        System.out.println("Audio envoyé à " + adresse_ip);
-                                    }
+                    while (true) {
+                        message = in.readUTF();
+                        System.out.println("Audio reçu");
+                        synchronized (clients) {
+                            for (int i = 0; i < ip_client.size(); i++) {
+                                if (ip_client.get(i).equals(adresse_ip)) {
+                                    clients.get(i).writeUTF("a");
+                                    System.out.println("Audio envoyé à " + adresse_ip);
                                 }
                             }
                         }
                     }
+
+//                    byte[] buffer = new byte[4096];
+//                    int byte_lue;
+//                    while ((byte_lue = in.read(buffer)) != -1) {
+//                        System.out.println("Audio reçu...");
+//                        synchronized (clients) {
+//                            for (int i = 0; i < ip_client.size(); i++) {
+//                                if (ip_client.get(i).equals(adresse_ip)) {
+//                                    clients.get(i).write(buffer, 0, byte_lue);
+//                                    System.out.println("Audio envoyé à " + adresse_ip);
+//                                }
+//                            }
+//                        }
+//                    }
                 }
 
 
@@ -83,7 +93,7 @@ public class ServeurAudio {
                     clients.remove(out);
                     ip_client.remove(this.socket.getInetAddress().toString());
                 }
-                System.out.println("Liste des clients pour les appels (client et leur ip respectif) " + clients + " " + ip_client);
+                System.out.println("Liste des clients pour les appels : " + clients + " " + ip_client);
             }
         }
     }
