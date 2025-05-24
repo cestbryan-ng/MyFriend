@@ -1,15 +1,27 @@
 package javafxtest.testjavafx;
 
 import org.junit.jupiter.api.Test;
-import java.net.Inet4Address;
+import org.junit.jupiter.api.Assertions;
+
 import java.net.UnknownHostException;
-import java.util.Arrays;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 class MainPageTest {
 
     @Test
-    void main() throws UnknownHostException {
-        String texte = "a=b=c";
-        System.out.println(Arrays.toString(texte.split("=")));
+    void testmethodes() throws UnknownHostException {
+        LocalDateTime date = LocalDateTime.now();
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        String dateformat = date.format(format);
+        dateformat = "le " + dateformat;
+        System.out.println(dateformat);
+    }
+
+    public static void main(String[] args) {
+
     }
 }

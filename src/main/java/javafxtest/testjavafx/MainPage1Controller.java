@@ -41,9 +41,6 @@ public class MainPage1Controller {
     @FXML
     private TextField photo_profil;
 
-    static List<String> liste_nom = new ArrayList<>();
-    static List<String> liste_pass = new ArrayList<>();
-    static Map<String, String> utilisateurs_etatsenligne = new HashMap<>();
 
     @FXML
     void profile(ActionEvent event) {
@@ -57,8 +54,7 @@ public class MainPage1Controller {
         String motdepasse2 = mot_de_passe_utilisateur2.getText();
         String numero = numero_tel.getText();
         String profil = photo_profil.getText();
-        liste_nom.clear();
-        liste_pass.clear();
+
         message_erreur.setStyle("-fx-text-fill : red");
 
         if ((nomutilisateur.isEmpty()) || (motdepasse1.isEmpty()) || (motdepasse2.isEmpty()) || (numero.isEmpty())) {
@@ -74,15 +70,18 @@ public class MainPage1Controller {
         try(Connection connection = BaseDeDonnee.seConnecter(); Statement stm = connection.createStatement()) {
             if (profil.isEmpty()) stm.executeUpdate("insert into user(username, code_acces, phone_number) values(\""+ nomutilisateur +"\", \""+ motdepasse1 +"\", "+ numero +");");
             else {}
+
             stm.executeUpdate("insert into connected_user(user_id)\n" +
                     "select user_id from user\n" +
                     "where username = \""+ nomutilisateur +"\";");
+
             message_erreur.setText("Inscription reussie");
             message_erreur.setStyle("-fx-text-fill : green");
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setHeaderText("Inscription reussie");
             alert.setContentText("Appuyez sur ok pour acceder à l'écran de connexion");
             alert.showAndWait();
+
             FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("MainPageUI.fxml"));
             Scene scene = new Scene(fxmlLoader.load(), 600, 250);
             scene.getStylesheets().add(getClass().getResource("MainPageUI.css").toExternalForm());

@@ -11,6 +11,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -22,11 +24,16 @@ import java.io.DataInputStream;
 import java.net.Inet4Address;
 
 public class MainPageController {
-    private static final String ADRESSE_SERVEUR = "192.168.6.1";
+    private static final String ADRESSE_SERVEUR = "localhost";
     static Socket socket;
     static DataOutputStream out;
     static DataInputStream in;
     static String nomutilisateur;
+    static String adresse_utilisateur;
+    static String adresse_recepteur;
+    static String adressre_recepteur2;
+    static String recepteur;
+    static String enligne;
 
     @FXML
     private HBox hbox1;
@@ -69,29 +76,59 @@ public class MainPageController {
                     socket = new Socket(ADRESSE_SERVEUR, Serveur.NP_PORT);
                     in = new DataInputStream(socket.getInputStream());
                     out = new DataOutputStream(socket.getOutputStream());
+
+                    adresse_utilisateur = Inet4Address.getLocalHost().toString();
+                    adresse_utilisateur = "/" + adresse_utilisateur.split("/")[1];
+
                     stm.executeUpdate("update connected_user\n" +
                             "set adresse_ip = \""+ Inet4Address.getLocalHost().toString() +"\"\n" +
                             "where user_id in (\n" +
                             "select user_id from user where username = \""+ nomutilisateur +"\");");
+
+                    // Lancement de la nouvelle fenetre
                     FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("Page1UI.fxml"));
                     Scene scene = new Scene(fxmlLoader.load(), 950, 600);
                     scene.getStylesheets().add(getClass().getResource("Page1UI.css").toExternalForm());
                     Stage stage = new Stage();
                     stage.setTitle("MonApp");
                     stage.setScene(scene);
+                    stage.setOnCloseRequest(e -> {
+                        try {
+                            MainPageController.in.close();
+                            MainPageController.out.close();
+                            MainPageController.socket.close();
+
+                            Connection  connection2 = BaseDeDonnee.seConnecter();
+                            Statement stmt = connection2.createStatement();
+                            stmt.executeUpdate("update connected_user\n" +
+                                    "set statut = \"offline\"\n" +
+                                    "where user_id in (\n" +
+                                    "select user_id from user where username = \""+ MainPageController.nomutilisateur +"\");");
+
+                            stmt.executeUpdate("update connected_user\n" +
+                                    "set last_connection = current_timestamp\n" +
+                                    "where user_id in\n" +
+                                    "(select user_id from user where username = \""+ MainPageController.nomutilisateur +"\");");
+
+                            stmt.close();
+                            connection2.close();
+                        } catch (IOException | SQLException err) {
+                        }
+                    });
                     stage.show();
                     Stage stage1 = (Stage) anchorpane1.getScene().getWindow();
                     stage1.close();
-                    break;
+                    return;
                 }
             }
-            message_erreur.setText("Utilisateur introuvable");
+
+            message_erreur.setText("Utilisateur ou Mot de passe incorrect");
 
         } catch (SQLException | IOException e) {
             e.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setHeaderText("Echec de connexion");
-            alert.setContentText("Réesayer ultérieurement");
+            alert.setContentText("Nous n'avons pas pu vous connecter");
             alert.showAndWait();
         }
     }

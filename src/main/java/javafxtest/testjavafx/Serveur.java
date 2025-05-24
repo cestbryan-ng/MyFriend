@@ -36,7 +36,7 @@ public class Serveur {
 
         public void run() {
             String message;
-            String adresse_ip;
+            String adresse_celui_envoye, adresse_type_envoye, nom_celui_envoye;
 
             try {
                 in  = new DataInputStream(socket.getInputStream());
@@ -47,76 +47,31 @@ public class Serveur {
                     ip_client.add(this.socket.getInetAddress().toString());
                 }
 
-                System.out.println("Liste des clients " + clients + " " + ip_client);
+                System.out.println("Liste des clients actuellement en ligne : " + clients + " " + ip_client);
 
                 while (true) {
-                    adresse_ip = in.readUTF();
+                    adresse_celui_envoye = in.readUTF();
+                    adresse_type_envoye = in.readUTF();
+                    nom_celui_envoye = in.readUTF();
                     message = in.readUTF();
-                    if (message.equals("message")) {
-                        message = in.readUTF();
-                        System.out.println("Message recu : " + message);
+
+                    if (message.equals("message_fichier")) {
+                        System.out.println("Information reçu de  " + adresse_celui_envoye);
                         synchronized (clients) {
                             for (int i = 0; i < ip_client.size(); ++i) {
-                                if (ip_client.get(i).equals(adresse_ip)) {
-                                    clients.get(i).writeUTF("message");
-                                    clients.get(i).writeUTF(message);
-                                    System.out.println("Message envoyé à " + adresse_ip + ": " + message);
+                                if (ip_client.get(i).equals(adresse_type_envoye)) {
+                                    clients.get(i).writeUTF(adresse_celui_envoye);
+                                    clients.get(i).writeUTF(nom_celui_envoye);
+                                    clients.get(i).writeUTF("message_fichier");
+                                    System.out.println("Information envoyé à " + adresse_type_envoye);
                                 }
                             }
-                        }
-
-                    } else if (message.equals("fichier")) {
-                        String nom_fichier = in.readUTF();
-                        Long taille_fichier = in.readLong();
-                        FileOutputStream fichier_recu = new FileOutputStream(nom_fichier);
-
-                        // On recupere le fichier
-                        byte[] buffer = new byte[65536];
-                        int bytesLues;
-                        while ((bytesLues = in.read(buffer, 0, (int) Math.min(buffer.length, taille_fichier))) != 0) {
-                            System.out.println("reçu : " + bytesLues + "/" + taille_fichier + " (octets)");
-                            fichier_recu.write(buffer, 0, bytesLues);
-                            taille_fichier -= bytesLues;
-                        }
-                        fichier_recu.flush();
-                        System.out.println("Fichier recu : " + nom_fichier);
-
-                        FileInputStream fichier_envoie = new FileInputStream(nom_fichier);
-                        buffer = new byte[65536];
-                        synchronized (clients) {
-                            for (int i = 0; i < ip_client.size(); i++) {
-                                if (ip_client.get(i).equals(adresse_ip)) {
-                                    clients.get(i).writeUTF("fichier");
-                                    clients.get(i).writeUTF(nom_fichier);
-                                    clients.get(i).writeLong(new File(nom_fichier).length());
-
-                                    // Pour l'envoie de fichier en faisant du handshake
-                                    while ((bytesLues = fichier_envoie.read(buffer)) != -1) {
-                                        System.out.println("envoyé : " + bytesLues +  " octects");
-                                        clients.get(i).write(buffer, 0, bytesLues);
-                                    }
-                                }
-                            }
-                        }
-                        fichier_envoie.close();
-                        System.out.println("Fichier envoyé à "+ adresse_ip +" : " + nom_fichier);
-
-                    } else if (message.equals("video")) {
-                        while (true) {
-                            int length = in.readInt();
-                            byte[] data = new byte[length];
-                            in.readFully(data);
-
-                            System.out.println("trame reçu...");
                         }
                     }
                 }
 
-
-
-            } catch (IOException e) {
-
-            } finally {
+            } catch (IOException e) {}
+            finally {
                 try {
                     socket.close();
                 } catch (IOException e) {
@@ -127,7 +82,7 @@ public class Serveur {
                     clients.remove(out);
                     ip_client.remove(this.socket.getInetAddress().toString());
                 }
-                System.out.println("Liste des clients (client et leur ip respectif) " + clients + " " + ip_client);
+                System.out.println("Liste des clients actuellement en ligne : " + clients + " " + ip_client);
             }
         }
     }

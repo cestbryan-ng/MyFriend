@@ -120,3 +120,36 @@
 #message_recue {
     -fx-background-color : #67fd30;
 }
+
+#mes {
+    -fx-background-color : "#e7961c";
+    -fx-background-radius : 10;
+    -fx-border-color : "white";
+    -fx-border-radius : 8;
+    -fx-border-width : 3;
+}
+
+#mmes {
+    -fx-background-color : "#67fd30";
+    -fx-background-radius : 10;
+    -fx-border-color : "white";
+    -fx-border-radius : 8;
+    -fx-border-width : 3;
+}
+
+.label {
+    -fx-font-family : "Cambria Math";
+    -fx-text-fill : black;
+    -fx-font-size : 14;
+}
+
+#abc {
+    -fx-text-fill : "white";
+}
+
+#tes {
+    -fx-font-family : "Cambria Math";
+    -fx-text-fill : black;
+    -fx-font-size : 10;
+}
+
