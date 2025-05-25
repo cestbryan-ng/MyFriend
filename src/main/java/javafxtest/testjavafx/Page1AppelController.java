@@ -44,20 +44,24 @@ public class Page1AppelController implements Initializable  {
         nom_recepteur.setText(MainPageController.recepteur_audio);
 
         try {
+            Page1Controller.out_audio.writeUTF(MainPageController.adressre_recepteur_audio);
             micro = (TargetDataLine) AudioSystem.getLine(info);
             micro.open(format);
             micro.start();
-        } catch (LineUnavailableException e) {
+        } catch (LineUnavailableException | IOException e) {
+            encours = false;
             e.printStackTrace();
         }
 
+
         new Thread(() -> {
             byte[] buffer = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = micro.read(buffer, 0, buffer.length)) != -1) {
+            while (encours) {
+                int bytesRead = micro.read(buffer, 0, buffer.length);
                 try {
                     Page1Controller.out_audio.write(buffer, 0, bytesRead);
                 } catch (IOException e) {
+                    encours = false;
                     e.printStackTrace();
                 }
             }
@@ -104,8 +108,6 @@ public class Page1AppelController implements Initializable  {
     @FXML
     void raccrocher() throws IOException {
         encours = false;
-        Stage stage1 = (Stage) root.getScene().getWindow();
-        stage1.close();
 
         if (micro.isActive()) {
             micro.stop();
@@ -115,6 +117,9 @@ public class Page1AppelController implements Initializable  {
         Page1Controller.in_audio.close();
         Page1Controller.out_audio.close();
         Page1Controller.socket_audio.close();
+
+        Stage stage1 = (Stage) root.getScene().getWindow();
+        stage1.close();
     }
 
     @FXML
@@ -160,9 +165,6 @@ public class Page1AppelController implements Initializable  {
             if (!(thread.isAlive())) Platform.runLater(thread::start);
         }
         } catch (IOException | LineUnavailableException e) {
-            try {
-                raccrocher();
-            } catch (IOException err) {}
             encours = false;
         }
 
