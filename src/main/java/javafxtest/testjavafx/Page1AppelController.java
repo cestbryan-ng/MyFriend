@@ -43,14 +43,23 @@ public class Page1AppelController implements Initializable  {
         encours = true;
         nom_recepteur.setText(MainPageController.recepteur_audio);
 
+        try {
+            micro = (TargetDataLine) AudioSystem.getLine(info);
+            micro.open(format);
+            micro.start();
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        }
+
         new Thread(() -> {
-            try {
-                Page1Controller.out_audio.writeUTF(MainPageController.adressre_recepteur_audio);
-                while (encours) {
-                    Page1Controller.out_audio.writeUTF("a");
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = micro.read(buffer, 0, buffer.length)) != -1) {
+                try {
+                    Page1Controller.out_audio.write(buffer, 0, bytesRead);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }).start();
 
@@ -74,9 +83,7 @@ public class Page1AppelController implements Initializable  {
 //        try {
 //            Page1Controller.out_audio.writeUTF(adresse_recepteur);
 //            Page1Controller.out_audio.writeUTF("appel");
-//            micro = (TargetDataLine) AudioSystem.getLine(info);
-//            micro.open(format);
-//            micro.start();
+
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
@@ -87,15 +94,7 @@ public class Page1AppelController implements Initializable  {
 //        encours = true;
 //
 //        Thread thread = new Thread(() -> {
-//            byte[] buffer_audio = new byte[4096];
-//            while (encours) {
-//                int bytesRead = micro.read(buffer_audio, 0, buffer_audio.length);
-//                try {
-//                    Page1Controller.out_audio.write(buffer_audio, 0, bytesRead);
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
+
 //        });
 //
 //        thread.start();
@@ -108,10 +107,10 @@ public class Page1AppelController implements Initializable  {
         Stage stage1 = (Stage) root.getScene().getWindow();
         stage1.close();
 
-//        if (micro.isActive()) {
-//            micro.stop();
-//            micro.close();
-//        }
+        if (micro.isActive()) {
+            micro.stop();
+            micro.close();
+        }
 
         Page1Controller.in_audio.close();
         Page1Controller.out_audio.close();
@@ -149,31 +148,31 @@ public class Page1AppelController implements Initializable  {
             }
         });
 
-        while (true) {
-            try {
-                message = Page1Controller.in_audio.readUTF();
-            } catch (IOException e) {
-                try {
-                    raccrocher();
-                } catch (IOException err) {}
-                break;
-            }
+        try {
+            SourceDataLine sortie_audio = AudioSystem.getSourceDataLine(format);
+            sortie_audio.open(format);
+            sortie_audio.start();
+
+        int byte_lue;
+        byte[] buffer = new byte[4096];
+        while ((byte_lue = Page1Controller.in_audio.read(buffer)) != -1) {
+            sortie_audio.write(buffer, 0, byte_lue);
             if (!(thread.isAlive())) Platform.runLater(thread::start);
         }
+        } catch (IOException | LineUnavailableException e) {
+            try {
+                raccrocher();
+            } catch (IOException err) {}
+            encours = false;
+        }
+
 
 //        Platform.runLater(() -> {
 //            nom_recepteur.setText(Page1Controller.recepteur);
 //        });
 ////
 //        try {
-//            SourceDataLine sortie_audio = AudioSystem.getSourceDataLine(format);
-//            sortie_audio.open(format);
-//            sortie_audio.start();
-//
-//            int byte_lue;
-//            byte[] buffer = new byte[4096];
-//            while ((byte_lue = Page1Controller.in_audio.read(buffer)) != -1) {
-//                sortie_audio.write(buffer, 0, byte_lue);
+
 //            }
 //
 //        } catch (IOException e) {
