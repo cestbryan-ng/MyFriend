@@ -30,6 +30,7 @@ import java.nio.file.StandardCopyOption;
 import java.sql.*;
 import java.net.URL;
 import javafx.scene.layout.VBox;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 import java.time.LocalDateTime;
@@ -137,6 +138,9 @@ public class Page1Controller implements Initializable {
 
     @FXML
     void Appel() throws IOException {
+        MainPageController.adressre_recepteur_audio = MainPageController.adresse_recepteur;
+        MainPageController.recepteur_audio = MainPageController.recepteur;
+
         if (MainPageController.enligne.equals("offline")) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setHeaderText("Pas possible d'effectuer l'appel");
@@ -423,11 +427,6 @@ public class Page1Controller implements Initializable {
                             socket_audio = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
                             in_audio = new DataInputStream(socket_audio.getInputStream());
                             out_audio = new DataOutputStream(socket_audio.getOutputStream());
-
-                            MainPageController.out.writeUTF(MainPageController.adresse_utilisateur);
-                            MainPageController.out.writeUTF(adresse_recepteur);
-                            MainPageController.out.writeUTF(MainPageController.nomutilisateur);
-                            MainPageController.out.writeUTF("audio");
 
                             FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("Page1Appel.fxml"));
                             Scene scene = new Scene(fxmlLoader.load(), 196, 330);

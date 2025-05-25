@@ -5,10 +5,10 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 
 <AnchorPane fx:id="root" prefHeight="330.0" prefWidth="196.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxtest.testjavafx.Page1AppelController">
    <children>
-      <Label fx:id="nom_recepteur" layoutX="60.0" layoutY="8.0" text="Batman" />
       <ImageView fitHeight="132.0" fitWidth="183.0" layoutX="29.0" layoutY="87.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@images/appel-telephonique1.png" />
@@ -23,6 +23,15 @@
             </ImageView>
          </graphic>
       </Button>
-      <Label fx:id="temps" layoutX="84.0" layoutY="45.0" text="0:0" />
+      <HBox fx:id="hbox1" alignment="BASELINE_CENTER" prefHeight="42.0" prefWidth="197.0">
+         <children>
+            <Label fx:id="nom_recepteur" text="Batman" />
+         </children>
+      </HBox>
+      <HBox fx:id="hbox2" alignment="BASELINE_CENTER" layoutY="41.0" prefHeight="34.0" prefWidth="198.0">
+         <children>
+            <Label fx:id="temps" text="0 : 0" />
+         </children>
+      </HBox>
    </children>
 </AnchorPane>

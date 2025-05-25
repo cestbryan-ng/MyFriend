@@ -5,9 +5,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 import javax.sound.sampled.*;
@@ -30,6 +32,7 @@ public class Page1AppelController implements Initializable  {
     @FXML
     private Label temps;
 
+
     static boolean encours = false;
     private static TargetDataLine micro;
     private static AudioFormat format = new AudioFormat(44100.0f, 16, 1, true, false);
@@ -38,16 +41,19 @@ public class Page1AppelController implements Initializable  {
     public void initialize(URL location, ResourceBundle resources) {
         new Thread(this::recevoir).start();
         encours = true;
+        nom_recepteur.setText(MainPageController.recepteur_audio);
 
-        try {
-            Page1Controller.out_audio.writeUTF(MainPageController.adressre_recepteur_audio);
-            while (encours) {
-                Platform.runLater(() -> nom_recepteur.setText(MainPageController.recepteur_audio));
-                Page1Controller.out_audio.writeUTF("a");
+        new Thread(() -> {
+            try {
+                Page1Controller.out_audio.writeUTF(MainPageController.adressre_recepteur_audio);
+                while (encours) {
+                    Page1Controller.out_audio.writeUTF("a");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        }).start();
+
 
 //
 //        String adresse_recepteur = "";
@@ -97,19 +103,19 @@ public class Page1AppelController implements Initializable  {
     }
 
     @FXML
-    void raccrocher(ActionEvent event) throws IOException {
+    void raccrocher() throws IOException {
         encours = false;
-        if (micro.isActive()) {
-            micro.stop();
-            micro.close();
-        }
+        Stage stage1 = (Stage) root.getScene().getWindow();
+        stage1.close();
+
+//        if (micro.isActive()) {
+//            micro.stop();
+//            micro.close();
+//        }
 
         Page1Controller.in_audio.close();
         Page1Controller.out_audio.close();
         Page1Controller.socket_audio.close();
-
-        Stage stage1 = (Stage) root.getScene().getWindow();
-        stage1.close();
     }
 
     @FXML
@@ -134,9 +140,6 @@ public class Page1AppelController implements Initializable  {
                     });
                     seconde++;
                 }
-                Platform.runLater(() -> {
-                    temps.setText("00:01");
-                });
 
                 try {
                     Thread.sleep(1000);
@@ -150,9 +153,12 @@ public class Page1AppelController implements Initializable  {
             try {
                 message = Page1Controller.in_audio.readUTF();
             } catch (IOException e) {
+                try {
+                    raccrocher();
+                } catch (IOException err) {}
                 break;
             }
-            thread.start();
+            if (!(thread.isAlive())) Platform.runLater(thread::start);
         }
 
 //        Platform.runLater(() -> {
