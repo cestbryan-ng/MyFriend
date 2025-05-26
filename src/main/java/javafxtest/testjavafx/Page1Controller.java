@@ -17,8 +17,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 
 import java.awt.*;
@@ -90,12 +92,34 @@ public class Page1Controller implements Initializable {
     @FXML
     private Button button_fichier;
 
+    @FXML
+    private Button button_emoji;
+
+    @FXML
+    private Popup emojiPopup;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         new Thread(this::Recevoir).start();
 
+        String[] emojis = {"👍", "💘", "👎", "😂", "😎", "😅", "🖖"};
+        emojiPopup = new Popup();
+        FlowPane emojiPane = new FlowPane();
+        emojiPane.setStyle("-fx-background-color : \"lightblue\" ");
+
+        for (String emoji : emojis) {
+            Button button = new Button(emoji);
+            button.setOnAction(e -> {
+                message_envoyer.appendText(emoji);
+                emojiPopup.hide();
+            });
+            emojiPane.getChildren().add(button);
+        }
+        emojiPopup.getContent().add(emojiPane);
+        emojiPopup.setAutoHide(true);
+
         int numero = 0;
-        button_appel.setDisable(true); button_fichier.setDisable(true); button_envoyer.setDisable(true); button_video.setDisable(true); button_info.setDisable(true); button_retirer.setDisable(true);
+        button_appel.setDisable(true); button_fichier.setDisable(true); button_envoyer.setDisable(true); button_video.setDisable(true); button_info.setDisable(true); button_retirer.setDisable(true); button_emoji.setDisable(true);
         nom_utilisateur.setText("Choissisez un contact");
         enligne.setText("Il s'agit de l'indice de connexion");
         vbox1.getChildren().clear();
@@ -368,9 +392,16 @@ public class Page1Controller implements Initializable {
                                         vBox.setAlignment(Pos.CENTER_RIGHT);
                                         vBox.setStyle("-fx-background-color : \"#e7961c\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
                                         HBox hBox = new HBox();
+                                        ImageView imageView1 = new ImageView(new Image(getClass().getResource("images/cercle0.png").toString()));
+                                        imageView1.setFitWidth(40);
+                                        imageView1.setFitHeight(18);
+                                        imageView1.setPreserveRatio(true);
+                                        imageView1.setPickOnBounds(true);
                                         vbox2.getChildren().add(hBox);
+                                        hBox.getChildren().add(imageView1);
                                         hBox.getChildren().add(vBox);
-                                        HBox.setMargin(vBox, new Insets(5, 0, 0, 0));
+                                        HBox.setMargin(imageView1, new Insets(30, 0, 0, 0));
+                                        HBox.setMargin(vBox, new Insets(0, 0, 0, 5));
                                     });
 
                                 } else {
@@ -397,9 +428,16 @@ public class Page1Controller implements Initializable {
                                         vBox.setAlignment(Pos.CENTER_RIGHT);
                                         vBox.setStyle("-fx-background-color : \"#e7961c\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
                                         HBox hBox = new HBox();
+                                        ImageView imageView1 = new ImageView(new Image(getClass().getResource("images/cercle0.png").toString()));
+                                        imageView1.setFitWidth(40);
+                                        imageView1.setFitHeight(18);
+                                        imageView1.setPreserveRatio(true);
+                                        imageView1.setPickOnBounds(true);
                                         vbox2.getChildren().add(hBox);
+                                        hBox.getChildren().add(imageView1);
                                         hBox.getChildren().add(vBox);
-                                        HBox.setMargin(vBox, new Insets(5, 0, 0, 0));
+                                        HBox.setMargin(imageView1, new Insets(30, 0, 0, 0));
+                                        HBox.setMargin(vBox, new Insets(0, 0, 0, 5));
                                     });
                                 }
                             }
@@ -444,98 +482,6 @@ public class Page1Controller implements Initializable {
                     }
                 });
             }
-
-//            if (type_envoe.equals("message")) {
-//                String message_recu = "";
-//                try {
-//                    message_recu = MainPageController.in.readUTF();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                String finalMessage_recu = message_recu;
-//
-//                if (finalMessage_recu.split("=")[0].equals("123456789abcdefgh")) {
-//                    if (finalMessage_recu.split("=")[2].equals("video")) {
-//                        if (Page1VideoController.encours) continue;
-//                        Platform.runLater(() -> {
-//                            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-//                            alert.setHeaderText(finalMessage_recu.split("=")[1] + " vous appelle");
-//                            alert.setContentText("Appuyer sur OK pour décrocher");
-//                            Optional<ButtonType> result = alert.showAndWait();
-//                            if (result.isPresent() && result.get() == ButtonType.OK) {
-//                                recepteur = finalMessage_recu.split("=")[1];
-//                                adresse_recepteur = "rien";
-//                                try {
-//                                    Video();
-//                                } catch (IOException e) {
-//                                    throw new RuntimeException(e);
-//                                }
-//                            }
-//                        });
-//                        continue;
-//                    } else {
-//                        if (Page1AppelController.encours) continue;
-//                        Platform.runLater(() -> {
-//                            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-//                            alert.setHeaderText(finalMessage_recu.split("=")[1] + " vous appelle");
-//                            alert.setContentText("Appuyer sur OK pour décrocher");
-//                            Optional<ButtonType> result = alert.showAndWait();
-//                            if (result.isPresent() && result.get() == ButtonType.OK) {
-//                                recepteur = finalMessage_recu.split("=")[1];
-//                                adresse_recepteur = "rien";
-//                                try {
-//                                    Appel();
-//                                } catch (IOException e) {
-//                                    throw new RuntimeException(e);
-//                                }
-//                            }
-//                        });
-//                        continue;
-//                    }
-//                }
-//
-//                Platform.runLater(() -> {
-//                    Label label = new Label();
-//                    label.setText(finalMessage_recu);
-//                    label.setPrefHeight(25);
-//                    label.setAlignment(Pos.BASELINE_CENTER);
-//                    label.setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
-//                    label.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14; -fx-font-weight : bold; -fx-background-color : lightgreen; -fx-background-radius : 20;");
-//                    HBox hBox = new HBox();
-//                    vbox2.getChildren().add(hBox);
-//                    hBox.getChildren().add(label);
-//                    HBox.setMargin(label, new Insets(10, 0, 0, 10));
-//                });
-//
-//            } else if (type_envoe.equals("fichier")) {
-//                String nom_fichier = MainPageController.in.readUTF();
-//                long taille_fichier = MainPageController.in.readLong();
-//
-//                FileOutputStream fichier_recu = new FileOutputStream(nom_fichier);
-//                // On recupere le fichier
-//                byte[] buffer = new byte[65536];
-//                int bytesLues;
-//                while ((bytesLues = MainPageController.in.read(buffer, 0, (int) Math.min(buffer.length, taille_fichier))) != 0) {
-//                    System.out.println(bytesLues);
-//                    fichier_recu.write(buffer, 0, bytesLues);
-//                    taille_fichier -= bytesLues;
-//                }
-//                System.out.println("reçu avec succès");
-//                fichier_recu.close();
-//
-//                Platform.runLater(() -> {
-//                    Label label = new Label();
-//                    label.setText("Fichier reçu sous le nom de : " + nom_fichier);
-//                    label.setPrefHeight(25);
-//                    label.setAlignment(Pos.BASELINE_CENTER);
-//                    label.setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
-//                    label.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14; -fx-font-weight : bold; -fx-background-color : lightgreen; -fx-background-radius : 20;");
-//                    HBox hBox = new HBox();
-//                    vbox2.getChildren().add(hBox);
-//                    hBox.getChildren().add(label);
-//                    HBox.setMargin(label, new Insets(10, 0, 0, 10));
-//                });
-//            }
         }
     }
 
@@ -716,7 +662,7 @@ public class Page1Controller implements Initializable {
     @FXML
     void Charger(ActionEvent event) {
         vbox2.getChildren().clear();
-        button_appel.setDisable(false); button_fichier.setDisable(false); button_envoyer.setDisable(false); button_video.setDisable(false); button_info.setDisable(false); button_retirer.setDisable(false);
+        button_appel.setDisable(false); button_fichier.setDisable(false); button_envoyer.setDisable(false); button_video.setDisable(false); button_info.setDisable(false); button_retirer.setDisable(false); button_emoji.setDisable(false);
         Button button_clique = (Button) event.getSource();
 
         String heure_derniere_connexion = "";
@@ -808,9 +754,16 @@ public class Page1Controller implements Initializable {
                         vBox.setAlignment(Pos.CENTER_RIGHT);
                         vBox.setStyle("-fx-background-color : \"#e7961c\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
                         HBox hBox = new HBox();
+                        ImageView imageView = new ImageView(new Image(getClass().getResource("images/cercle0.png").toString()));
+                        imageView.setFitWidth(40);
+                        imageView.setFitHeight(18);
+                        imageView.setPreserveRatio(true);
+                        imageView.setPickOnBounds(true);
                         vbox2.getChildren().add(hBox);
+                        hBox.getChildren().add(imageView);
                         hBox.getChildren().add(vBox);
-                        HBox.setMargin(vBox, new Insets(5, 0, 0, 0));
+                        HBox.setMargin(imageView, new Insets(30, 0, 0, 0));
+                        HBox.setMargin(vBox, new Insets(0, 0, 0, 5));
                     } else {
                         Button button = new Button();
                         button.setText(resultSet.getString(3));
@@ -834,9 +787,16 @@ public class Page1Controller implements Initializable {
                         vBox.setAlignment(Pos.CENTER_RIGHT);
                         vBox.setStyle("-fx-background-color : \"#e7961c\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
                         HBox hBox = new HBox();
+                        ImageView imageView1 = new ImageView(new Image(getClass().getResource("images/cercle0.png").toString()));
+                        imageView1.setFitWidth(40);
+                        imageView1.setFitHeight(18);
+                        imageView1.setPreserveRatio(true);
+                        imageView1.setPickOnBounds(true);
                         vbox2.getChildren().add(hBox);
+                        hBox.getChildren().add(imageView1);
                         hBox.getChildren().add(vBox);
-                        HBox.setMargin(vBox, new Insets(5, 0, 0, 0));
+                        HBox.setMargin(imageView1, new Insets(30, 0, 0, 0));
+                        HBox.setMargin(vBox, new Insets(0, 0, 0, 5));
                     }
                 }
             }
@@ -966,6 +926,17 @@ public class Page1Controller implements Initializable {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    @FXML
+    void emoji(ActionEvent event) {
+        if (!(emojiPopup.isShowing())) {
+            double x = button_emoji.localToScreen(0, 0).getX() - 2 * button_emoji.getWidth();
+            double y = button_emoji.localToScreen(0, 0).getY() + button_emoji.getHeight();
+            emojiPopup.show(button_emoji, x, y);
+        } else {
+            emojiPopup.hide();
         }
     }
 

@@ -176,6 +176,14 @@
                      <children>
                         <HBox prefWidth="0.0">
                            <children>
+                              <ImageView fitHeight="18.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@images/cercle0.png" />
+                                 </image>
+                                 <HBox.margin>
+                                    <Insets top="30.0" />
+                                 </HBox.margin>
+                              </ImageView>
                               <VBox fx:id="mes" alignment="CENTER_RIGHT">
                                  <children>
                                     <Label text="yo">
@@ -193,7 +201,7 @@
                                     </Label>
                                  </children>
                                  <HBox.margin>
-                                    <Insets />
+                                    <Insets left="5.0" />
                                  </HBox.margin>
                               </VBox>
                            </children>
@@ -259,11 +267,23 @@
                         <Insets top="7.0" />
                      </HBox.margin>
                   </Button>
-                  <TextField fx:id="message_envoyer" prefHeight="31.0" prefWidth="597.0" promptText="Entrer un message...">
+                  <TextField fx:id="message_envoyer" prefHeight="31.0" prefWidth="543.0" promptText="Entrer un message...">
                      <HBox.margin>
                         <Insets top="9.0" />
                      </HBox.margin>
                   </TextField>
+                  <Button fx:id="button_emoji" mnemonicParsing="false" onAction="#emoji" prefHeight="18.0" prefWidth="29.0">
+                     <graphic>
+                        <ImageView fitHeight="38.0" fitWidth="31.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/emotion.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <HBox.margin>
+                        <Insets top="7.0" />
+                     </HBox.margin>
+                  </Button>
                   <Button fx:id="button_envoyer" mnemonicParsing="false" onAction="#Envoie">
                      <graphic>
                         <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">

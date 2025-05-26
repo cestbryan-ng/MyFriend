@@ -1,24 +1,15 @@
 package javafxtest.testjavafx;
 
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 import javax.sound.sampled.*;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ResourceBundle;
 
 public class Page1AppelController implements Initializable  {
@@ -53,7 +44,6 @@ public class Page1AppelController implements Initializable  {
             e.printStackTrace();
         }
 
-
         new Thread(() -> {
             byte[] buffer = new byte[4096];
             while (encours) {
@@ -62,51 +52,13 @@ public class Page1AppelController implements Initializable  {
                     Page1Controller.out_audio.write(buffer, 0, bytesRead);
                 } catch (IOException e) {
                     encours = false;
-                    e.printStackTrace();
                 }
             }
         }).start();
-
-
-//
-//        String adresse_recepteur = "";
-//
-//        try (Connection connection = BaseDeDonnee.seConnecter(); Statement stmt = connection.createStatement()) {
-//            ResultSet resultSet1 = stmt.executeQuery("select adresse_ip from connected_user\n" +
-//                    "where user_id in \n" +
-//                    "(select user_id from user where username = \"" + Page1Controller.recepteur + "\");");
-//            while (resultSet1.next()) {
-//                adresse_recepteur = resultSet1.getString(1);
-//                adresse_recepteur = "/" + adresse_recepteur.split("/")[1];
-//            }
-//            resultSet1.close();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//        try {
-//            Page1Controller.out_audio.writeUTF(adresse_recepteur);
-//            Page1Controller.out_audio.writeUTF("appel");
-
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        catch (LineUnavailableException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        encours = true;
-//
-//        Thread thread = new Thread(() -> {
-
-//        });
-//
-//        thread.start();
-
     }
 
     @FXML
-    void raccrocher() throws IOException {
+    void raccrocher() throws IOException  {
         encours = false;
 
         if (micro.isActive()) {
@@ -118,14 +70,13 @@ public class Page1AppelController implements Initializable  {
         Page1Controller.out_audio.close();
         Page1Controller.socket_audio.close();
 
+
         Stage stage1 = (Stage) root.getScene().getWindow();
         stage1.close();
     }
 
     @FXML
     void recevoir() {
-        String message;
-
         Thread thread = new Thread(() -> {
             Integer minute = 0, seconde = 0;
 
@@ -147,9 +98,7 @@ public class Page1AppelController implements Initializable  {
 
                 try {
                     Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                } catch (InterruptedException _) {}
             }
         });
 
@@ -158,30 +107,15 @@ public class Page1AppelController implements Initializable  {
             sortie_audio.open(format);
             sortie_audio.start();
 
-        int byte_lue;
-        byte[] buffer = new byte[4096];
-        while ((byte_lue = Page1Controller.in_audio.read(buffer)) != -1) {
-            sortie_audio.write(buffer, 0, byte_lue);
-            if (!(thread.isAlive())) Platform.runLater(thread::start);
-        }
+            byte[] buffer = new byte[4096];
+            while (encours) {
+                int byte_lue = Page1Controller.in_audio.read(buffer);
+                sortie_audio.write(buffer, 0, byte_lue);
+                if (!(thread.isAlive())) Platform.runLater(thread::start);
+            }
         } catch (IOException | LineUnavailableException e) {
             encours = false;
         }
-
-
-//        Platform.runLater(() -> {
-//            nom_recepteur.setText(Page1Controller.recepteur);
-//        });
-////
-//        try {
-
-//            }
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (LineUnavailableException e) {
-//            throw new RuntimeException(e);
-//        }
     }
 
 }
