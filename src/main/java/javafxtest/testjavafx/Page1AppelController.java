@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class Page1AppelController implements Initializable  {
+public class Page1AppelController implements Initializable {
 
     @FXML
     private AnchorPane root;
@@ -23,16 +23,17 @@ public class Page1AppelController implements Initializable  {
     @FXML
     private Label temps;
 
-
-    static boolean encours = false;
+    private static boolean encours = false;
     private static TargetDataLine micro;
-    private static AudioFormat format = new AudioFormat(44100.0f, 16, 1, true, false);
-    private static DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
+    private static final AudioFormat format = new AudioFormat(44100.0f, 16, 1, true, false);
+    private static final DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
 
+    @Override
     public void initialize(URL location, ResourceBundle resources) {
-        new Thread(this::recevoir).start();
         encours = true;
         nom_recepteur.setText(MainPageController.recepteur_audio);
+
+        new Thread(this::recevoir).start();
 
         try {
             Page1Controller.out_audio.writeUTF(MainPageController.adressre_recepteur_audio);
@@ -42,9 +43,10 @@ public class Page1AppelController implements Initializable  {
         } catch (LineUnavailableException | IOException e) {
             encours = false;
             e.printStackTrace();
+            return;
         }
 
-        new Thread(() -> {
+        Thread emissionThread = new Thread(() -> {
             byte[] buffer = new byte[4096];
             while (encours) {
                 int bytesRead = micro.read(buffer, 0, buffer.length);
@@ -52,58 +54,56 @@ public class Page1AppelController implements Initializable  {
                     Page1Controller.out_audio.write(buffer, 0, bytesRead);
                 } catch (IOException e) {
                     encours = false;
+                    break;
                 }
             }
-        }).start();
+        });
+        emissionThread.setDaemon(true);
+        emissionThread.start();
     }
 
     @FXML
-    void raccrocher() throws IOException  {
+    private void raccrocher() throws IOException {
         encours = false;
 
-        if (micro.isActive()) {
+        if (micro != null && micro.isActive()) {
             micro.stop();
             micro.close();
         }
 
-        Page1Controller.in_audio.close();
-        Page1Controller.out_audio.close();
-        Page1Controller.socket_audio.close();
+        if (Page1Controller.in_audio != null) Page1Controller.in_audio.close();
+        if (Page1Controller.out_audio != null) Page1Controller.out_audio.close();
+        if (Page1Controller.socket_audio != null) Page1Controller.socket_audio.close();
 
-
-        Stage stage1 = (Stage) root.getScene().getWindow();
-        stage1.close();
+        Stage stage = (Stage) root.getScene().getWindow();
+        stage.close();
     }
 
-    @FXML
-    void recevoir() {
-        Thread thread = new Thread(() -> {
-            Integer minute = 0, seconde = 0;
+    private void recevoir() {
+        Thread timerThread = new Thread(() -> {
+            int minute = 0, seconde = 0;
 
             while (encours) {
-                if (seconde == 60) {
-                    seconde = 1;
-                    minute++;
-                    Integer finalMinute = minute, finalSeconde = seconde;
-                    Platform.runLater(() -> {
-                        temps.setText(finalMinute + " : " + finalSeconde);
-                    });
-                } else {
-                    Integer finalMinute1 = minute, finalSeconde1 = seconde;
-                    Platform.runLater(() -> {
-                        temps.setText(finalMinute1 + " : " + finalSeconde1);
-                    });
-                    seconde++;
-                }
+                final int m = minute;
+                final int s = seconde;
+                Platform.runLater(() -> temps.setText(String.format("%02d : %02d", m, s)));
 
                 try {
                     Thread.sleep(1000);
-                } catch (InterruptedException _) {}
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
+                if (++seconde == 60) {
+                    seconde = 0;
+                    minute++;
+                }
             }
         });
+        timerThread.setDaemon(true);
+        timerThread.start();
 
-        try {
-            SourceDataLine sortie_audio = AudioSystem.getSourceDataLine(format);
+        try (SourceDataLine sortie_audio = AudioSystem.getSourceDataLine(format)) {
             sortie_audio.open(format);
             sortie_audio.start();
 
@@ -111,11 +111,10 @@ public class Page1AppelController implements Initializable  {
             while (encours) {
                 int byte_lue = Page1Controller.in_audio.read(buffer);
                 sortie_audio.write(buffer, 0, byte_lue);
-                if (!(thread.isAlive())) Platform.runLater(thread::start);
             }
         } catch (IOException | LineUnavailableException e) {
             encours = false;
+            e.printStackTrace();
         }
     }
-
 }

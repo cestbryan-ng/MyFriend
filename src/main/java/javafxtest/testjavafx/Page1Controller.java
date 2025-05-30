@@ -96,7 +96,13 @@ public class Page1Controller implements Initializable {
     private Button button_emoji;
 
     @FXML
+    private Button button_exit;
+
+    @FXML
     private Popup emojiPopup;
+
+    @FXML
+    private Popup messagePopup;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -303,13 +309,20 @@ public class Page1Controller implements Initializable {
                 if ((!MainPageController.adresse_recepteur.equals(adresse_recepteur))) {
                     Platform.runLater(() -> {
                         Label label = new Label();
-                        label.setText(nom_recepteur + " vous a écrit");
+                        label.setText(nom_recepteur + " vous a envoyé un nouveau message.");
                         label.setPadding(new Insets(40, 0, 40, 0));
                         label.setStyle("-fx-text-fill : \"white\"; -fx-font-family : \"Cambria Math\"; -fx-font-size : 14;");
-                        vbox1.getChildren().add(0, label);
-                        PauseTransition delay = new PauseTransition(Duration.seconds(5));
-                        delay.setOnFinished(e -> vbox1.getChildren().remove(label));
-                        delay.play();
+                        messagePopup = new Popup();
+                        HBox messagePane = new HBox();
+                        messagePane.setStyle("-fx-background-color : \"lightblue\"; -fx-background-radius : 10; ");
+                        messagePane.setAlignment(Pos.CENTER);
+                        messagePane.setPadding(new Insets(0, 10, 0, 10));
+                        messagePane.getChildren().add(label);
+                        messagePopup.getContent().add(messagePane);
+                        messagePopup.setAutoHide(true);
+                        double x = button_exit.localToScreen(0, 0).getX();
+                        double y = button_exit.localToScreen(0, 0).getY() - button_exit.getHeight();
+                        messagePopup.show(button_exit, x, y);
                     });
                 } else {
                     Platform.runLater(() -> vbox2.getChildren().clear());

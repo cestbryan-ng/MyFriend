@@ -22,18 +22,7 @@ class MainPageTest {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        Integer minute = 0, seconde = 0;
-        while (true) {
-            if (seconde == 60) {
-                seconde = 1;
-                minute++;
-                System.out.println(minute + " : 0" );
-            } else {
-                System.out.println(minute + ":" + seconde);
-                seconde++;
-            }
-
-            Thread.sleep(1000);
-        }
+        Integer a = 12;
+        System.out.printf("%02d", a);
     }
 }
