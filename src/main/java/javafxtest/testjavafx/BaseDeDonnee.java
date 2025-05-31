@@ -14,8 +14,11 @@ public class BaseDeDonnee {
         config.setJdbcUrl("jdbc:mysql://localhost:3306/monapp");
         config.setUsername("Jean_Roland");
         config.setPassword("Papasenegal0");
+
         config.setMaximumPoolSize(10);
         config.setMinimumIdle(2);
+        config.setConnectionTimeout(8000);
+        config.setIdleTimeout(900000);
         dataSource = new HikariDataSource(config);
     }
 

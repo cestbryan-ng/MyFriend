@@ -66,6 +66,9 @@ public class Page1Controller implements Initializable {
     private ImageView profil_enligne;
 
     @FXML
+    private HBox hbox1;
+
+    @FXML
     private VBox vbox1;
 
     @FXML
@@ -95,8 +98,6 @@ public class Page1Controller implements Initializable {
     @FXML
     private Button button_emoji;
 
-    @FXML
-    private Button button_exit;
 
     @FXML
     private Popup emojiPopup;
@@ -124,7 +125,6 @@ public class Page1Controller implements Initializable {
         emojiPopup.getContent().add(emojiPane);
         emojiPopup.setAutoHide(true);
 
-        int numero = 0;
         button_appel.setDisable(true); button_fichier.setDisable(true); button_envoyer.setDisable(true); button_video.setDisable(true); button_info.setDisable(true); button_retirer.setDisable(true); button_emoji.setDisable(true);
         nom_utilisateur.setText("Choissisez un contact");
         enligne.setText("Il s'agit de l'indice de connexion");
@@ -138,6 +138,7 @@ public class Page1Controller implements Initializable {
                     "(select user_id from user\n" +
                     "where username = \""+ MainPageController.nomutilisateur +"\");");
 
+            int numero = 0;
             while (resultSet.next()) {
                 Button button = new Button(resultSet.getString(1));
                 button.setPrefSize(191, 47);
@@ -316,13 +317,14 @@ public class Page1Controller implements Initializable {
                         HBox messagePane = new HBox();
                         messagePane.setStyle("-fx-background-color : \"lightblue\"; -fx-background-radius : 10; ");
                         messagePane.setAlignment(Pos.CENTER);
+                        messagePane.setPrefHeight(20);
                         messagePane.setPadding(new Insets(0, 10, 0, 10));
                         messagePane.getChildren().add(label);
                         messagePopup.getContent().add(messagePane);
                         messagePopup.setAutoHide(true);
-                        double x = button_exit.localToScreen(0, 0).getX();
-                        double y = button_exit.localToScreen(0, 0).getY() - button_exit.getHeight();
-                        messagePopup.show(button_exit, x, y);
+                        double x = hbox1.localToScreen(0, 0).getX() + hbox1.getWidth() / 2;
+                        double y = hbox1.localToScreen(0, 0).getY() + hbox1.getHeight();
+                        messagePopup.show(hbox1, x, y);
                     });
                 } else {
                     Platform.runLater(() -> vbox2.getChildren().clear());
@@ -332,8 +334,8 @@ public class Page1Controller implements Initializable {
                         other = (Integer) liste.get(2);
                         ResultSet resultSet = stmt.executeQuery("select sender_id, recever_id, content, date_format(time_send, 'le %d/%m/%Y %H:%i'), content_image from message\n" +
                                 "where sender_id in (" + self + ", " + other + ")\n" +
-                                "and recever_id in (" + self + ", " + other + ") order by time_send asc;");
-                        while (resultSet.next()) {
+                                "and recever_id in (" + self + ", " + other + ") order by time_send desc limit 1;");
+                        if (resultSet.next()) {
                             String message = resultSet.getString(3), date = resultSet.getString(4);
                             if (self.equals(resultSet.getInt(1))) {
                                 if (resultSet.getBinaryStream(5) == null) {
