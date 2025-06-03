@@ -496,6 +496,35 @@ public class Page1Controller implements Initializable {
                         }
                     }
                 });
+            } else {
+                MainPageController.recepteur_audio = nom_recepteur;
+                MainPageController.adressre_recepteur_audio = adresse_recepteur;
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setHeaderText(nom_recepteur+ " vous appelle");
+                    alert.setContentText("Appuyer sur OK pour décrocher");
+                    Optional<ButtonType> result = alert.showAndWait();
+                    if (result.isPresent() && result.get() == ButtonType.OK) {
+                        try {
+                            socket_video = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
+                            in_video = new DataInputStream(socket_audio.getInputStream());
+                            out_video = new DataOutputStream(socket_audio.getOutputStream());
+
+                            FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("Page1Video.fxml"));
+                            Scene scene = new Scene(fxmlLoader.load(), 930, 410);
+                            scene.getStylesheets().add(getClass().getResource("Page1VideoUI.css").toExternalForm());
+                            Stage stage = new Stage();
+                            stage.setTitle("MonApp");
+                            stage.setScene(scene);
+                            stage.show();
+                        } catch (IOException e) {
+                            Alert alert1 = new Alert(Alert.AlertType.INFORMATION);
+                            alert1.setHeaderText("Erreur");
+                            alert1.setContentText("L'appel n'a pas pu démarrer");
+                            alert1.show();
+                        }
+                    }
+                });
             }
         }
     }
@@ -671,7 +700,41 @@ public class Page1Controller implements Initializable {
 
     @FXML
     void Video() throws IOException {
+        MainPageController.adressre_recepteur_audio = MainPageController.adresse_recepteur;
+        MainPageController.recepteur_audio = MainPageController.recepteur;
 
+        if (MainPageController.enligne.equals("offline")) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText("Pas possible d'effectuer l'appel");
+            alert.setContentText("L'utilisateur n'est pas en ligne");
+            alert.show();
+            return;
+        }
+
+        try {
+            socket_video = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
+            in_video = new DataInputStream(socket_audio.getInputStream());
+            out_video = new DataOutputStream(socket_audio.getOutputStream());
+
+            MainPageController.out.writeUTF(MainPageController.adresse_utilisateur);
+            MainPageController.out.writeUTF(MainPageController.adresse_recepteur);
+            MainPageController.out.writeUTF(MainPageController.nomutilisateur);
+            MainPageController.out.writeUTF("video");
+        } catch (IOException e) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText("Erreur");
+            alert.setContentText("L'appel n'a pas pu démarrer");
+            alert.show();
+            return;
+        }
+
+        FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("Page1Video.fxml"));
+        Scene scene = new Scene(fxmlLoader.load(), 930, 410);
+        scene.getStylesheets().add(getClass().getResource("Page1VideoUI.css").toExternalForm());
+        Stage stage = new Stage();
+        stage.setTitle("MonApp");
+        stage.setScene(scene);
+        stage.show();
     }
 
     @FXML

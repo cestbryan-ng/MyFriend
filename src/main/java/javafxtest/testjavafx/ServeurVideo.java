@@ -47,26 +47,22 @@ public class ServeurVideo {
                     ip_client.add(this.socket.getInetAddress().toString());
                 }
 
-                System.out.println("Liste des clients pour les appels vidéo " + clients + " " + ip_client);
+                System.out.println("Liste des clients pour les appels vidéo : " + clients + " " + ip_client);
 
                 while (true) {
                     adresse_ip = in.readUTF();
-                    message = in.readUTF();
-                    if (message.equals("video")) {
-                        while (true) {
-                            int length = in.readInt();
-                            byte[] data = new byte[length];
-                            in.readFully(data);
-                            System.out.println("trame reçu...");
+                    while (true) {
+                        int length = in.readInt();
+                        byte[] data = new byte[length];
+                        in.readFully(data);
+                        System.out.println("trame reçu...");
 
-                            synchronized (clients) {
-                                for (int i = 0; i < ip_client.size(); i++) {
-                                    if (ip_client.get(i).equals(adresse_ip)) {
-                                        clients.get(i).writeInt(length);
-                                        clients.get(i).write(data);
-                                        clients.get(i).flush();
-                                        System.out.println("trame envoyé à : " + adresse_ip);
-                                    }
+                        synchronized (clients) {
+                            for (int i = 0; i < ip_client.size(); i++) {
+                                if (ip_client.get(i).equals(adresse_ip)) {
+                                    clients.get(i).writeInt(length);
+                                    clients.get(i).write(data);
+                                    System.out.println("trame envoyé à : " + adresse_ip);
                                 }
                             }
                         }
@@ -87,7 +83,7 @@ public class ServeurVideo {
                     clients.remove(out);
                     ip_client.remove(this.socket.getInetAddress().toString());
                 }
-                System.out.println("Liste des clients pour les appels (client et leur ip respectif) " + clients + " " + ip_client);
+                System.out.println("Liste des clients pour les appels : " + clients + " " + ip_client);
             }
         }
     }
