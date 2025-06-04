@@ -101,7 +101,6 @@ public class Page1AppelController implements Initializable {
             }
         });
         timerThread.setDaemon(true);
-        timerThread.start();
 
         try (SourceDataLine sortie_audio = AudioSystem.getSourceDataLine(format)) {
             sortie_audio.open(format);
@@ -111,6 +110,7 @@ public class Page1AppelController implements Initializable {
             while (encours) {
                 int byte_lue = Page1Controller.in_audio.read(buffer);
                 sortie_audio.write(buffer, 0, byte_lue);
+                if (!(timerThread.isAlive()))  timerThread.start();
             }
         } catch (IOException | LineUnavailableException e) {
             encours = false;

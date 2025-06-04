@@ -293,7 +293,7 @@ public class Page1Controller implements Initializable {
     }
 
     @FXML
-    void Recevoir() {
+    void Recevoir(){
         while (true) {
             String adresse_recepteur, nom_recepteur, type_envoie;
             Integer self = 0, other = 0;
@@ -317,17 +317,21 @@ public class Page1Controller implements Initializable {
                         HBox messagePane = new HBox();
                         messagePane.setStyle("-fx-background-color : \"lightblue\"; -fx-background-radius : 10; ");
                         messagePane.setAlignment(Pos.CENTER);
-                        messagePane.setPrefHeight(20);
+                        messagePane.setPrefHeight(10);
                         messagePane.setPadding(new Insets(0, 10, 0, 10));
                         messagePane.getChildren().add(label);
                         messagePopup.getContent().add(messagePane);
                         messagePopup.setAutoHide(true);
-                        double x = hbox1.localToScreen(0, 0).getX() + hbox1.getWidth() / 2;
+                        double x = hbox1.localToScreen(0, 0).getX() + hbox1.getWidth() / 2 + messagePane.getWidth() / 2;
                         double y = hbox1.localToScreen(0, 0).getY() + hbox1.getHeight();
                         messagePopup.show(hbox1, x, y);
                     });
                 } else {
-                    Platform.runLater(() -> vbox2.getChildren().clear());
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     try (Connection  connection = BaseDeDonnee.seConnecter(); Statement stmt = connection.createStatement()) {
                         List<Object> liste = Select.elements(MainPageController.recepteur);
                         self = (Integer) liste.get(1);
@@ -712,15 +716,16 @@ public class Page1Controller implements Initializable {
         }
 
         try {
-            socket_video = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
-            in_video = new DataInputStream(socket_audio.getInputStream());
-            out_video = new DataOutputStream(socket_audio.getOutputStream());
+            socket_video = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurVideo.NP_PORT);
+            in_video = new DataInputStream(socket_video.getInputStream());
+            out_video = new DataOutputStream(socket_video.getOutputStream());
 
             MainPageController.out.writeUTF(MainPageController.adresse_utilisateur);
             MainPageController.out.writeUTF(MainPageController.adresse_recepteur);
             MainPageController.out.writeUTF(MainPageController.nomutilisateur);
             MainPageController.out.writeUTF("video");
         } catch (IOException e) {
+            e.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setHeaderText("Erreur");
             alert.setContentText("L'appel n'a pas pu démarrer");
