@@ -14,17 +14,15 @@ import javafx.stage.Stage;
 import org.opencv.core.Mat;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgcodecs.Imgcodecs.*;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.core.MatOfByte;
 
+import javax.sound.sampled.*;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.io.ByteArrayInputStream;
 
 public class Page1VideoController implements Initializable {
-
 
     @FXML
     private HBox hbox1;
@@ -41,10 +39,14 @@ public class Page1VideoController implements Initializable {
     private static boolean encours = false;
     private VideoCapture camera;
 
+    private static final AudioFormat format = new AudioFormat(44100.0f, 16, 1, true, false);
+    private static TargetDataLine micro;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         encours = true;
-        camera = new VideoCapture(0); // Caméra par défaut
+        message_connexion.setVisible(false);
+        camera = new VideoCapture(0);
 
         if (!camera.isOpened()) {
             System.err.println("Impossible d'ouvrir la caméra");
@@ -53,6 +55,8 @@ public class Page1VideoController implements Initializable {
 
         new Thread(this::sendVideo).start();
         new Thread(this::receiveVideo).start();
+        new Thread(this::sendAudio).start();
+        new Thread(this::receiveAudio).start();
     }
 
     private void sendVideo() {
@@ -78,12 +82,10 @@ public class Page1VideoController implements Initializable {
                 }
             }
         }
-
         camera.release();
     }
 
     private void receiveVideo() {
-        message_connexion.setVisible(false);
         while (encours) {
             try {
                 int length = Page1Controller.in_video.readInt();
@@ -101,13 +103,55 @@ public class Page1VideoController implements Initializable {
         }
     }
 
+    private void sendAudio() {
+        try {
+            micro = AudioSystem.getTargetDataLine(format);
+            micro.open(format);
+            micro.start();
+
+            byte[] buffer = new byte[4096];
+            while (encours) {
+                int bytesRead = micro.read(buffer, 0, buffer.length);
+                Page1Controller.out_audio.write(buffer, 0, bytesRead);
+            }
+        } catch (LineUnavailableException | IOException e) {
+            encours = false;
+            e.printStackTrace();
+        }
+    }
+
+    private void receiveAudio() {
+        try (SourceDataLine speaker = AudioSystem.getSourceDataLine(format)) {
+            speaker.open(format);
+            speaker.start();
+
+            byte[] buffer = new byte[4096];
+            while (encours) {
+                int bytesRead = Page1Controller.in_audio.read(buffer);
+                speaker.write(buffer, 0, bytesRead);
+            }
+        } catch (IOException | LineUnavailableException e) {
+            encours = false;
+            e.printStackTrace();
+        }
+    }
+
     @FXML
     private void racrocher() throws IOException {
         encours = false;
 
+        if (micro != null && micro.isActive()) {
+            micro.stop();
+            micro.close();
+        }
+
         if (Page1Controller.in_video != null) Page1Controller.in_video.close();
         if (Page1Controller.out_video != null) Page1Controller.out_video.close();
         if (Page1Controller.socket_video != null) Page1Controller.socket_video.close();
+
+        if (Page1Controller.in_audio != null) Page1Controller.in_audio.close();
+        if (Page1Controller.out_audio != null) Page1Controller.out_audio.close();
+        if (Page1Controller.socket_audio != null) Page1Controller.socket_audio.close();
 
         Stage stage = (Stage) hbox1.getScene().getWindow();
         stage.close();

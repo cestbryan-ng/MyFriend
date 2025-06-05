@@ -11,7 +11,7 @@ public class BaseDeDonnee {
 
     static {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://192.168.1.102:3306/monapp");
+        config.setJdbcUrl("jdbc:mysql://192.168.1.101:3306/monapp");
         config.setUsername("Jean_Roland");
         config.setPassword("Papasenegal0");
 

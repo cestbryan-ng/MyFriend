@@ -28,10 +28,14 @@ public class Page1AppelController implements Initializable {
     private static final AudioFormat format = new AudioFormat(44100.0f, 16, 1, true, false);
     private static final DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
 
+    private Stage stage;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         encours = true;
         nom_recepteur.setText(MainPageController.recepteur_audio);
+
+        Platform.runLater(() -> stage = (Stage) root.getScene().getWindow());
 
         new Thread(this::recevoir).start();
 
@@ -54,6 +58,7 @@ public class Page1AppelController implements Initializable {
                     Page1Controller.out_audio.write(buffer, 0, bytesRead);
                 } catch (IOException e) {
                     encours = false;
+                    fermerFenetre();
                     break;
                 }
             }
@@ -75,7 +80,7 @@ public class Page1AppelController implements Initializable {
         if (Page1Controller.out_audio != null) Page1Controller.out_audio.close();
         if (Page1Controller.socket_audio != null) Page1Controller.socket_audio.close();
 
-        Stage stage = (Stage) root.getScene().getWindow();
+        if (stage == null) stage = (Stage) root.getScene().getWindow();
         stage.close();
     }
 
@@ -115,6 +120,21 @@ public class Page1AppelController implements Initializable {
         } catch (IOException | LineUnavailableException e) {
             encours = false;
             e.printStackTrace();
+            fermerFenetre();
         }
     }
+
+    private void fermerFenetre() {
+        Platform.runLater(() -> {
+            if (stage == null) {
+                stage = (Stage) root.getScene().getWindow();
+            }
+            if (stage != null) {
+                stage.close();
+            }
+        });
+    }
 }
+
+
+

@@ -2,8 +2,10 @@ package javafxtest.testjavafx;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -12,7 +14,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -113,6 +117,9 @@ public class RechercheController implements Initializable {
                 statement.executeUpdate("insert into contact(user_id, contact_user_id)\n" +
                         "values ("+ id1 +", "+ id2 +"),\n" +
                         "("+ id2 +", "+ id1 +");");
+
+                Stage stage1 = (Stage) anchorpane1.getScene().getWindow();
+                stage1.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }

@@ -24,7 +24,7 @@ import java.io.DataInputStream;
 import java.net.Inet4Address;
 
 public class MainPageController {
-    static final String ADRESSE_SERVEUR = "192.168.1.102";
+    static final String ADRESSE_SERVEUR = "192.168.1.101";
     static Socket socket;
     static DataOutputStream out;
     static DataInputStream in;

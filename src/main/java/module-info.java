@@ -3,9 +3,9 @@ module javafxtest.testjavafx {
     requires javafx.fxml;
     requires java.sql;
     requires jdk.compiler;
-    requires opencv;
     requires javafx.swing;
     requires com.zaxxer.hikari;
+    requires opencv;
 
 
     opens javafxtest.testjavafx to javafx.fxml;
