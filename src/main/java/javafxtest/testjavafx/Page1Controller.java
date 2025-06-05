@@ -501,8 +501,8 @@ public class Page1Controller implements Initializable {
                     }
                 });
             } else {
-                MainPageController.recepteur_audio = nom_recepteur;
-                MainPageController.adressre_recepteur_audio = adresse_recepteur;
+                MainPageController.recepteur_video = nom_recepteur;
+                MainPageController.adresse_recepteur_video = adresse_recepteur;
                 Platform.runLater(() -> {
                     Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                     alert.setHeaderText(nom_recepteur+ " vous appelle");
@@ -513,6 +513,10 @@ public class Page1Controller implements Initializable {
                             socket_video = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
                             in_video = new DataInputStream(socket_audio.getInputStream());
                             out_video = new DataOutputStream(socket_audio.getOutputStream());
+
+                            socket_audio = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
+                            in_audio = new DataInputStream(socket_audio.getInputStream());
+                            out_audio = new DataOutputStream(socket_audio.getOutputStream());
 
                             FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("Page1Video.fxml"));
                             Scene scene = new Scene(fxmlLoader.load(), 930, 410);
@@ -704,8 +708,8 @@ public class Page1Controller implements Initializable {
 
     @FXML
     void Video() throws IOException {
-        MainPageController.adressre_recepteur_audio = MainPageController.adresse_recepteur;
-        MainPageController.recepteur_audio = MainPageController.recepteur;
+        MainPageController.adresse_recepteur_video = MainPageController.adresse_recepteur;
+        MainPageController.recepteur_video = MainPageController.recepteur;
 
         if (MainPageController.enligne.equals("offline")) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -719,6 +723,10 @@ public class Page1Controller implements Initializable {
             socket_video = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurVideo.NP_PORT);
             in_video = new DataInputStream(socket_video.getInputStream());
             out_video = new DataOutputStream(socket_video.getOutputStream());
+
+            socket_audio = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
+            in_audio = new DataInputStream(socket_audio.getInputStream());
+            out_audio = new DataOutputStream(socket_audio.getOutputStream());
 
             MainPageController.out.writeUTF(MainPageController.adresse_utilisateur);
             MainPageController.out.writeUTF(MainPageController.adresse_recepteur);

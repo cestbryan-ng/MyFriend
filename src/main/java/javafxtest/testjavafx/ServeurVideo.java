@@ -11,7 +11,7 @@ public class ServeurVideo {
     static final List<DataOutputStream> clients = Collections.synchronizedList(new ArrayList<>());
     static final List<String> ip_client = Collections.synchronizedList(new ArrayList<>());
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         try (ServerSocket serverSocket = new ServerSocket(NP_PORT)) {
             System.out.println("En attente de connexion : ");
             while (true) {
@@ -35,7 +35,6 @@ public class ServeurVideo {
         }
 
         public void run() {
-            String message;
             String adresse_ip;
 
             try {

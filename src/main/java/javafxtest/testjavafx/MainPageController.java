@@ -28,13 +28,15 @@ public class MainPageController {
     static Socket socket;
     static DataOutputStream out;
     static DataInputStream in;
-    static String nomutilisateur;
-    static String adresse_utilisateur;
-    static String adresse_recepteur;
-    static String adressre_recepteur_audio;
-    static String recepteur;
-    static String recepteur_audio;
-    static String enligne;
+    static String nomutilisateur = "";
+    static String adresse_utilisateur = "";
+    static String adresse_recepteur = "";
+    static String adressre_recepteur_audio = "";
+    static String adresse_recepteur_video = "";
+    static String recepteur = "";
+    static String recepteur_audio = "";
+    static String recepteur_video = "";
+    static String enligne = "";
 
     @FXML
     private HBox hbox1;

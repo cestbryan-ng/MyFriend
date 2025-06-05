@@ -46,6 +46,13 @@ public class Page1VideoController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         encours = true;
         message_connexion.setVisible(false);
+        try {
+            Page1Controller.out_video.writeUTF(MainPageController.adresse_recepteur_video);
+            Page1Controller.out_audio.writeUTF(MainPageController.adressre_recepteur_audio);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         camera = new VideoCapture(0);
 
         if (!camera.isOpened()) {
