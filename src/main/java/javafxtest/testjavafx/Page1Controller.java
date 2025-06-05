@@ -510,9 +510,9 @@ public class Page1Controller implements Initializable {
                     Optional<ButtonType> result = alert.showAndWait();
                     if (result.isPresent() && result.get() == ButtonType.OK) {
                         try {
-                            socket_video = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
-                            in_video = new DataInputStream(socket_audio.getInputStream());
-                            out_video = new DataOutputStream(socket_audio.getOutputStream());
+                            socket_video = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurVideo.NP_PORT);
+                            in_video = new DataInputStream(socket_video.getInputStream());
+                            out_video = new DataOutputStream(socket_video.getOutputStream());
 
                             socket_audio = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
                             in_audio = new DataInputStream(socket_audio.getInputStream());

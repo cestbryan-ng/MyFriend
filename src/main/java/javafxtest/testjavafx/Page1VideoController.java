@@ -6,15 +6,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import org.opencv.core.Mat;
-import org.opencv.videoio.VideoCapture;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.core.MatOfByte;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.videoio.VideoCapture;
 
 import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;
@@ -41,22 +39,28 @@ public class Page1VideoController implements Initializable {
 
     private static final AudioFormat format = new AudioFormat(44100.0f, 16, 1, true, false);
     private static TargetDataLine micro;
+    private Stage stage;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         encours = true;
         message_connexion.setVisible(false);
+
+        Platform.runLater(() -> stage = (Stage) hbox1.getScene().getWindow());
+
         try {
             Page1Controller.out_video.writeUTF(MainPageController.adresse_recepteur_video);
             Page1Controller.out_audio.writeUTF(MainPageController.adressre_recepteur_audio);
         } catch (IOException e) {
             e.printStackTrace();
+            stopAndClose();
+            return;
         }
 
         camera = new VideoCapture(0);
-
         if (!camera.isOpened()) {
             System.err.println("Impossible d'ouvrir la caméra");
+            stopAndClose();
             return;
         }
 
@@ -84,12 +88,13 @@ public class Page1VideoController implements Initializable {
                     Page1Controller.out_video.writeInt(data.length);
                     Page1Controller.out_video.write(data);
                 } catch (IOException e) {
-                    encours = false;
                     e.printStackTrace();
+                    encours = false;
                 }
             }
         }
         camera.release();
+        stopAndClose();
     }
 
     private void receiveVideo() {
@@ -104,10 +109,11 @@ public class Page1VideoController implements Initializable {
                     imageview2.setImage(img);
                 });
             } catch (IOException e) {
-                encours = false;
                 e.printStackTrace();
+                encours = false;
             }
         }
+        stopAndClose();
     }
 
     private void sendAudio() {
@@ -122,9 +128,10 @@ public class Page1VideoController implements Initializable {
                 Page1Controller.out_audio.write(buffer, 0, bytesRead);
             }
         } catch (LineUnavailableException | IOException e) {
-            encours = false;
             e.printStackTrace();
+            encours = false;
         }
+        stopAndClose();
     }
 
     private void receiveAudio() {
@@ -138,29 +145,48 @@ public class Page1VideoController implements Initializable {
                 speaker.write(buffer, 0, bytesRead);
             }
         } catch (IOException | LineUnavailableException e) {
-            encours = false;
             e.printStackTrace();
+            encours = false;
         }
+        stopAndClose();
     }
 
     @FXML
     private void racrocher() throws IOException {
         encours = false;
+        stopAndClose();
+    }
 
-        if (micro != null && micro.isActive()) {
-            micro.stop();
-            micro.close();
+    private void stopAndClose() {
+        // Empêche l’exécution multiple
+        if (!encours) {
+            encours = false;
+
+            try {
+                if (micro != null && micro.isActive()) {
+                    micro.stop();
+                    micro.close();
+                }
+
+                if (Page1Controller.in_video != null) Page1Controller.in_video.close();
+                if (Page1Controller.out_video != null) Page1Controller.out_video.close();
+                if (Page1Controller.socket_video != null) Page1Controller.socket_video.close();
+
+                if (Page1Controller.in_audio != null) Page1Controller.in_audio.close();
+                if (Page1Controller.out_audio != null) Page1Controller.out_audio.close();
+                if (Page1Controller.socket_audio != null) Page1Controller.socket_audio.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            Platform.runLater(() -> {
+                if (stage == null && hbox1.getScene() != null) {
+                    stage = (Stage) hbox1.getScene().getWindow();
+                }
+                if (stage != null) {
+                    stage.close();
+                }
+            });
         }
-
-        if (Page1Controller.in_video != null) Page1Controller.in_video.close();
-        if (Page1Controller.out_video != null) Page1Controller.out_video.close();
-        if (Page1Controller.socket_video != null) Page1Controller.socket_video.close();
-
-        if (Page1Controller.in_audio != null) Page1Controller.in_audio.close();
-        if (Page1Controller.out_audio != null) Page1Controller.out_audio.close();
-        if (Page1Controller.socket_audio != null) Page1Controller.socket_audio.close();
-
-        Stage stage = (Stage) hbox1.getScene().getWindow();
-        stage.close();
     }
 }
