@@ -39,9 +39,6 @@ public class MainPageController {
     static String enligne = "";
 
     @FXML
-    private HBox hbox1;
-
-    @FXML
     private PasswordField mot_de_passe_utilisateur;
 
     @FXML

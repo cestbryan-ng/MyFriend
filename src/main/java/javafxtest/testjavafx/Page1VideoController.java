@@ -7,23 +7,36 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
 
 import javax.sound.sampled.*;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class Page1VideoController implements Initializable {
 
+    static {
+        // Charge la bibliothèque native OpenCV
+        try {
+            System.loadLibrary(Core.NATIVE_LIBRARY_NAME); // ex: opencv_java410
+        } catch (UnsatisfiedLinkError e) {
+            System.err.println("Erreur de chargement d'OpenCV : " + e.getMessage());
+        }
+    }
+
     @FXML
-    private HBox hbox1;
+    private VBox vbox1;
 
     @FXML
     private ImageView imageview1;
@@ -46,13 +59,12 @@ public class Page1VideoController implements Initializable {
         encours = true;
         message_connexion.setVisible(false);
 
-        Platform.runLater(() -> stage = (Stage) hbox1.getScene().getWindow());
+        Platform.runLater(() -> stage = (Stage) vbox1.getScene().getWindow());
 
         try {
             Page1Controller.out_video.writeUTF(MainPageController.adresse_recepteur_video);
             Page1Controller.out_audio.writeUTF(MainPageController.adressre_recepteur_audio);
         } catch (IOException e) {
-            e.printStackTrace();
             stopAndClose();
             return;
         }
@@ -64,10 +76,14 @@ public class Page1VideoController implements Initializable {
             return;
         }
 
+        Thread threadaudio1 = new Thread(this::receiveAudio);
+        Thread threadaudio2 = new Thread(this::sendAudio);
+        threadaudio1.setPriority(Thread.MAX_PRIORITY);
+        threadaudio2.setPriority(Thread.MAX_PRIORITY);
+        threadaudio1.start();
+        threadaudio2.start();
         new Thread(this::sendVideo).start();
         new Thread(this::receiveVideo).start();
-        new Thread(this::sendAudio).start();
-        new Thread(this::receiveAudio).start();
     }
 
     private void sendVideo() {
@@ -88,13 +104,12 @@ public class Page1VideoController implements Initializable {
                     Page1Controller.out_video.writeInt(data.length);
                     Page1Controller.out_video.write(data);
                 } catch (IOException e) {
-                    e.printStackTrace();
                     encours = false;
+                    stopAndClose();
                 }
             }
         }
         camera.release();
-        stopAndClose();
     }
 
     private void receiveVideo() {
@@ -109,11 +124,11 @@ public class Page1VideoController implements Initializable {
                     imageview2.setImage(img);
                 });
             } catch (IOException e) {
-                e.printStackTrace();
                 encours = false;
+                stopAndClose();
             }
         }
-        stopAndClose();
+
     }
 
     private void sendAudio() {
@@ -125,13 +140,13 @@ public class Page1VideoController implements Initializable {
             byte[] buffer = new byte[4096];
             while (encours) {
                 int bytesRead = micro.read(buffer, 0, buffer.length);
-                Page1Controller.out_audio.write(buffer, 0, bytesRead);
+                BufferedOutputStream bos = new BufferedOutputStream(Page1Controller.out_audio);
+                bos.write(buffer, 0, bytesRead);
             }
         } catch (LineUnavailableException | IOException e) {
-            e.printStackTrace();
             encours = false;
+            stopAndClose();
         }
-        stopAndClose();
     }
 
     private void receiveAudio() {
@@ -139,16 +154,22 @@ public class Page1VideoController implements Initializable {
             speaker.open(format);
             speaker.start();
 
-            byte[] buffer = new byte[4096];
+            boolean arret = true;
+
+            byte[] buffer = new byte[1024];
             while (encours) {
-                int bytesRead = Page1Controller.in_audio.read(buffer);
-                speaker.write(buffer, 0, bytesRead);
+                try {
+                    int bytesRead = Page1Controller.in_audio.read(buffer);
+                    speaker.write(buffer, 0, bytesRead);
+                } catch (SocketTimeoutException e) {
+                    encours = false;
+                    stopAndClose();
+                }
             }
         } catch (IOException | LineUnavailableException e) {
-            e.printStackTrace();
             encours = false;
+            stopAndClose();
         }
-        stopAndClose();
     }
 
     @FXML
@@ -158,7 +179,6 @@ public class Page1VideoController implements Initializable {
     }
 
     private void stopAndClose() {
-        // Empêche l’exécution multiple
         if (!encours) {
             encours = false;
 
@@ -180,8 +200,8 @@ public class Page1VideoController implements Initializable {
             }
 
             Platform.runLater(() -> {
-                if (stage == null && hbox1.getScene() != null) {
-                    stage = (Stage) hbox1.getScene().getWindow();
+                if (stage == null && vbox1.getScene() != null) {
+                    stage = (Stage) vbox1.getScene().getWindow();
                 }
                 if (stage != null) {
                     stage.close();

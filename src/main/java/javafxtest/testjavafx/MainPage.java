@@ -20,6 +20,5 @@ public class MainPage extends Application {
 
     public static void main(String[] args) {
         launch();
-        OpenCVLoader.load();
     }
 }

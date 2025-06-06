@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 
 import javax.sound.sampled.*;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -46,7 +47,6 @@ public class Page1AppelController implements Initializable {
             micro.start();
         } catch (LineUnavailableException | IOException e) {
             encours = false;
-            e.printStackTrace();
             return;
         }
 
@@ -112,19 +112,34 @@ public class Page1AppelController implements Initializable {
             sortie_audio.start();
 
             byte[] buffer = new byte[4096];
-            while (encours) {
-                int byte_lue = Page1Controller.in_audio.read(buffer);
-                sortie_audio.write(buffer, 0, byte_lue);
-                if (!(timerThread.isAlive()))  timerThread.start();
+            while (true) {
+                try {
+                    int byte_lue = Page1Controller.in_audio.read(buffer);
+                    sortie_audio.write(buffer, 0, byte_lue);
+                    if (!(timerThread.isAlive())) {
+                        timerThread.start();
+                        Page1Controller.socket_audio.setSoTimeout(500);
+                    }
+                } catch (SocketTimeoutException e) {
+                    encours = false;
+                    fermerFenetre();
+                }
             }
         } catch (IOException | LineUnavailableException e) {
             encours = false;
-            e.printStackTrace();
             fermerFenetre();
         }
     }
 
     private void fermerFenetre() {
+        try {
+            if (Page1Controller.in_audio != null) Page1Controller.in_audio.close();
+            if (Page1Controller.out_audio != null) Page1Controller.out_audio.close();
+            if (Page1Controller.socket_audio != null) Page1Controller.socket_audio.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         Platform.runLater(() -> {
             if (stage == null) {
                 stage = (Stage) root.getScene().getWindow();

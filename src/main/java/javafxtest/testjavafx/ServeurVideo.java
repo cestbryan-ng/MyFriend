@@ -54,14 +54,12 @@ public class ServeurVideo {
                         int length = in.readInt();
                         byte[] data = new byte[length];
                         in.readFully(data);
-                        System.out.println("trame reçu...");
 
                         synchronized (clients) {
                             for (int i = 0; i < ip_client.size(); i++) {
                                 if (ip_client.get(i).equals(adresse_ip)) {
                                     clients.get(i).writeInt(length);
                                     clients.get(i).write(data);
-                                    System.out.println("trame envoyé à : " + adresse_ip);
                                 }
                             }
                         }

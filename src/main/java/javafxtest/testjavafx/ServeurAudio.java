@@ -53,12 +53,10 @@ public class ServeurAudio {
                     byte[] buffer = new byte[4096];
                     int byte_lue;
                     while ((byte_lue = in.read(buffer)) != -1) {
-                        System.out.println("Audio reçu...");
                         synchronized (clients) {
                             for (int i = 0; i < ip_client.size(); i++) {
                                 if (ip_client.get(i).equals(adresse_ip)) {
                                     clients.get(i).write(buffer, 0, byte_lue);
-                                    System.out.println("Audio envoyé à " + adresse_ip);
                                 }
                             }
                         }

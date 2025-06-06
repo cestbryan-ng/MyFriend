@@ -501,6 +501,8 @@ public class Page1Controller implements Initializable {
                     }
                 });
             } else {
+                MainPageController.recepteur_audio = nom_recepteur;
+                MainPageController.adressre_recepteur_audio = adresse_recepteur;
                 MainPageController.recepteur_video = nom_recepteur;
                 MainPageController.adresse_recepteur_video = adresse_recepteur;
                 Platform.runLater(() -> {
@@ -708,6 +710,8 @@ public class Page1Controller implements Initializable {
 
     @FXML
     void Video() throws IOException {
+        MainPageController.adressre_recepteur_audio = MainPageController.adresse_recepteur;
+        MainPageController.recepteur_audio = MainPageController.recepteur;
         MainPageController.adresse_recepteur_video = MainPageController.adresse_recepteur;
         MainPageController.recepteur_video = MainPageController.recepteur;
 

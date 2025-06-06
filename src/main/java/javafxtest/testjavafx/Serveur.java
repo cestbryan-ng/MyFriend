@@ -79,6 +79,18 @@ public class Serveur {
                                 }
                             }
                         }
+                    }  else if (message.equals("video")) {
+                        System.out.println("Information reçu de  " + adresse_celui_envoye);
+                        synchronized (clients) {
+                            for (int i = 0; i < ip_client.size(); ++i) {
+                                if (ip_client.get(i).equals(adresse_type_envoye)) {
+                                    clients.get(i).writeUTF(adresse_celui_envoye);
+                                    clients.get(i).writeUTF(nom_celui_envoye);
+                                    clients.get(i).writeUTF("video");
+                                    System.out.println("Information envoyé à " + adresse_type_envoye);
+                                }
+                            }
+                        }
                     }
                 }
 
