@@ -59,6 +59,7 @@ public class Page1AppelController implements Initializable {
                     Page1Controller.out_audio.write(buffer, 0, bytesRead);
                 } catch (IOException e) {
                     encours = false;
+                    fermerFenetre();
                     break;
                 }
             }
@@ -91,7 +92,6 @@ public class Page1AppelController implements Initializable {
             }
         });
         threadTimer.setDaemon(true);
-        threadTimer.start();
 
         try (SourceDataLine sortie_audio = AudioSystem.getSourceDataLine(format)) {
             sortie_audio.open(format);
@@ -102,8 +102,13 @@ public class Page1AppelController implements Initializable {
                 try {
                     int byte_lue = Page1Controller.in_audio.read(buffer);
                     sortie_audio.write(buffer, 0, byte_lue);
+                    if (!(threadTimer.isAlive())) {
+                        threadTimer.start();
+                        Page1Controller.socket_audio.setSoTimeout(500);
+                    }
                 } catch (SocketTimeoutException e) {
                     encours = false;
+                    fermerFenetre();
                 }
             }
         } catch (IOException | LineUnavailableException e) {

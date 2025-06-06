@@ -71,6 +71,8 @@ public class Page1VideoController implements Initializable {
         threadSendAudio = new Thread(this::sendAudio);
         threadReceiveAudio = new Thread(this::receiveAudio);
 
+        threadReceiveAudio.setPriority(Thread.MAX_PRIORITY);
+
         threadSendVideo.start();
         threadReceiveVideo.start();
         threadSendAudio.start();
@@ -96,6 +98,7 @@ public class Page1VideoController implements Initializable {
                     Page1Controller.out_video.write(data);
                 } catch (IOException e) {
                     encours = false;
+                    stopAndClose();
                     break;
                 }
             }
@@ -116,6 +119,7 @@ public class Page1VideoController implements Initializable {
                 });
             } catch (IOException e) {
                 encours = false;
+                stopAndClose();
                 break;
             }
         }
@@ -134,6 +138,7 @@ public class Page1VideoController implements Initializable {
             }
         } catch (LineUnavailableException | IOException e) {
             encours = false;
+            stopAndClose();
         }
     }
 
@@ -149,11 +154,13 @@ public class Page1VideoController implements Initializable {
                     speaker.write(buffer, 0, bytesRead);
                 } catch (SocketTimeoutException e) {
                     encours = false;
+                    stopAndClose();
                     break;
                 }
             }
         } catch (IOException | LineUnavailableException e) {
             encours = false;
+            stopAndClose();
         }
     }
 
