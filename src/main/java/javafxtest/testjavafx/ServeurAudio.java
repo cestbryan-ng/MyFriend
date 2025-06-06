@@ -50,7 +50,7 @@ public class ServeurAudio {
 
                 while (true) {
                     adresse_ip = in.readUTF();
-                    byte[] buffer = new byte[4096];
+                    byte[] buffer = new byte[1024];
                     int byte_lue;
                     while ((byte_lue = in.read(buffer)) != -1) {
                         synchronized (clients) {

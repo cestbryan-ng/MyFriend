@@ -17,7 +17,6 @@ public class BaseDeDonnee {
 
         config.setMaximumPoolSize(10);
         config.setMinimumIdle(2);
-        config.setConnectionTimeout(8000);
         config.setIdleTimeout(900000);
         dataSource = new HikariDataSource(config);
     }
