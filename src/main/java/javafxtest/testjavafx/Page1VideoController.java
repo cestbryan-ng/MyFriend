@@ -72,6 +72,7 @@ public class Page1VideoController implements Initializable {
         threadReceiveAudio = new Thread(this::receiveAudio);
 
         threadReceiveAudio.setPriority(Thread.MAX_PRIORITY);
+        threadSendAudio.setPriority(Thread.MAX_PRIORITY);
 
         threadSendVideo.start();
         threadReceiveVideo.start();
