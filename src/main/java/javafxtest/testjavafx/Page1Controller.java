@@ -16,9 +16,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
@@ -31,7 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.sql.*;
 import java.net.URL;
-import javafx.scene.layout.VBox;
+
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
@@ -41,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import javafx.scene.text.Font;
 
 public class Page1Controller implements Initializable {
     static Socket socket_video;
@@ -109,13 +108,17 @@ public class Page1Controller implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         new Thread(this::Recevoir).start();
 
-        String[] emojis = {"👍", "💘", "👎", "😂", "😎", "😅", "🖖", "\uD83D\uDE01", "🥺", "\uD83D\uDE07", "\uD83D\uDE30", "\uD83D\uDE25", "😴", "😙", "😍", "🤑"};
+        String[] emojis = {"👍", "❤", "👎", "😂", "😎", "😅", "🖖", "\uD83D\uDE01", "🥺", "\uD83D\uDE07", "\uD83D\uDE30", "\uD83D\uDE25", "😴", "😙", "😍", "🤑", "🙃", "🤬"};
         emojiPopup = new Popup();
         FlowPane emojiPane = new FlowPane();
-        emojiPane.setStyle("-fx-background-color : \"lightblue\" ");
+        emojiPane.setStyle("-fx-background-color : \"lightblue\"; -fx-background-radius : 18; ");
+        emojiPane.setAlignment(Pos.CENTER);
+        emojiPane.setPadding(new Insets(4, 4, 4, 4));
+
 
         for (String emoji : emojis) {
             Button button = new Button(emoji);
+            button.setFont(Font.font("Segoe UI Emoji", 24));
             button.setOnAction(e -> {
                 message_envoyer.appendText(emoji);
                 emojiPopup.hide();
@@ -242,12 +245,12 @@ public class Page1Controller implements Initializable {
                         "values (\""+ sender_id +"\", \""+ recever_id +"\", \""+ message_envoyer.getText() +"\");");
             } else {
                 try {
+                    stmt.executeUpdate("insert into message(sender_id, recever_id, content)\n" +
+                            "values (\"" + sender_id + "\", \"" + recever_id + "\", \"" + message_envoyer.getText() + "\");");
                     MainPageController.out.writeUTF(MainPageController.adresse_utilisateur);
                     MainPageController.out.writeUTF(MainPageController.adresse_recepteur);
                     MainPageController.out.writeUTF(MainPageController.nomutilisateur);
                     MainPageController.out.writeUTF("message_fichier");
-                    stmt.executeUpdate("insert into message(sender_id, recever_id, content)\n" +
-                            "values (\"" + sender_id + "\", \"" + recever_id + "\", \"" + message_envoyer.getText() + "\");");
                 } catch (IOException e) {
                     e.printStackTrace();
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -272,8 +275,15 @@ public class Page1Controller implements Initializable {
         String dateformat = date.format(format);
         dateformat = "le " + dateformat;
         Label label1 = new Label();
+        label1.setWrapText(true);
+        label1.setAlignment(Pos.CENTER_RIGHT);
+        label1.setPrefWidth(Region.USE_COMPUTED_SIZE);
+        label1.setPrefHeight(Region.USE_COMPUTED_SIZE);
+        label1.setMinHeight(Region.USE_PREF_SIZE);
+        label1.setMaxWidth(250);
+        label1.setFont(Font.font("Segoe UI Emoji"));
         label1.setText(message_envoyer.getText());
-        label1.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
+        label1.setStyle("-fx-text-fill : black; -fx-font-size : 14;");
         label1.setPadding(new Insets(5, 8, 7, 8));
         Label label2 = new Label();
         label2.setText(dateformat);
@@ -345,7 +355,14 @@ public class Page1Controller implements Initializable {
                                     Platform.runLater(() -> {
                                         Label label1 = new Label();
                                         label1.setText(message);
-                                        label1.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
+                                        label1.setWrapText(true);
+                                        label1.setAlignment(Pos.CENTER_RIGHT);
+                                        label1.setPrefWidth(Region.USE_COMPUTED_SIZE);
+                                        label1.setPrefHeight(Region.USE_COMPUTED_SIZE);
+                                        label1.setMinHeight(Region.USE_PREF_SIZE);
+                                        label1.setMaxWidth(250);
+                                        label1.setFont(Font.font("Segoe UI Emoji"));
+                                        label1.setStyle("-fx-text-fill : black; -fx-font-size : 14;");
                                         label1.setPadding(new Insets(5, 8, 7, 8));
                                         Label label2 = new Label();
                                         label2.setText(date);
@@ -366,20 +383,21 @@ public class Page1Controller implements Initializable {
                                 } else {
                                     Platform.runLater(() -> {
                                         Button button = new Button();
+                                        button.setFont(Font.font("Segoe UI Emoji"));
                                         button.setText(message);
                                         button.setMnemonicParsing(false);
-                                        button.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
+                                        button.setStyle(" -fx-text-fill : black; -fx-font-size : 14;");
                                         button.setPadding(new Insets(5, 8, 7, 8));
                                         button.setOnAction(e -> ouvrir(e));
                                         ImageView imageView = new ImageView(new Image(getClass().getResource("images/dossier.png").toString()));
-                                        imageView.setFitWidth(28);
-                                        imageView.setFitHeight(19);
+                                        imageView.setFitWidth(50);
+                                        imageView.setFitHeight(50);
                                         imageView.setPreserveRatio(true);
                                         imageView.setPickOnBounds(true);
                                         button.setGraphic(imageView);
                                         Label label2 = new Label();
                                         label2.setText(date);
-                                        label2.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 10;");
+                                        label2.setStyle(" -fx-text-fill : black; -fx-font-size : 10;");
                                         label2.setPadding(new Insets(0, 8, 5, 8));
                                         VBox vBox = new VBox();
                                         vBox.getChildren().add(button);
@@ -397,8 +415,15 @@ public class Page1Controller implements Initializable {
                                 if (resultSet.getBinaryStream(5) == null) {
                                     Platform.runLater(() -> {
                                         Label label1 = new Label();
+                                        label1.setWrapText(true);
+                                        label1.setAlignment(Pos.CENTER_RIGHT);
+                                        label1.setPrefWidth(Region.USE_COMPUTED_SIZE);
+                                        label1.setPrefHeight(Region.USE_COMPUTED_SIZE);
+                                        label1.setMinHeight(Region.USE_PREF_SIZE);
+                                        label1.setMaxWidth(250);
+                                        label1.setFont(Font.font("Segoe UI Emoji"));
                                         label1.setText(message);
-                                        label1.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
+                                        label1.setStyle(" -fx-text-fill : black; -fx-font-size : 14;");
                                         label1.setPadding(new Insets(5, 8, 7, 8));
                                         Label label2 = new Label();
                                         label2.setText(date);
@@ -425,14 +450,15 @@ public class Page1Controller implements Initializable {
                                 } else {
                                     Platform.runLater(() -> {
                                         Button button = new Button();
+                                        button.setFont(Font.font("Segoe UI Emoji"));
                                         button.setText(message);
                                         button.setMnemonicParsing(false);
-                                        button.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
+                                        button.setStyle(" -fx-text-fill : black; -fx-font-size : 14;");
                                         button.setPadding(new Insets(5, 8, 7, 8));
                                         button.setOnAction(e -> ouvrir(e));
                                         ImageView imageView = new ImageView(new Image(getClass().getResource("images/dossier.png").toString()));
-                                        imageView.setFitWidth(28);
-                                        imageView.setFitHeight(19);
+                                        imageView.setFitWidth(50);
+                                        imageView.setFitHeight(50);
                                         imageView.setPreserveRatio(true);
                                         imageView.setPickOnBounds(true);
                                         button.setGraphic(imageView);
@@ -787,8 +813,15 @@ public class Page1Controller implements Initializable {
                 if (self.equals(resultSet.getInt(1))) {
                     if (resultSet.getBinaryStream(5) == (null)) {
                         Label label1 = new Label();
+                        label1.setFont(Font.font("Segoe UI Emoji"));
+                        label1.setWrapText(true);
+                        label1.setAlignment(Pos.CENTER_RIGHT);
+                        label1.setPrefWidth(Region.USE_COMPUTED_SIZE);
+                        label1.setPrefHeight(Region.USE_COMPUTED_SIZE);
+                        label1.setMinHeight(Region.USE_PREF_SIZE);
+                        label1.setMaxWidth(250);
                         label1.setText(resultSet.getString(3));
-                        label1.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
+                        label1.setStyle("-fx-text-fill : black; -fx-font-size : 14;");
                         label1.setPadding(new Insets(5, 8, 7, 8));
                         Label label2 = new Label();
                         label2.setText(resultSet.getString(4));
@@ -806,14 +839,15 @@ public class Page1Controller implements Initializable {
                         HBox.setMargin(vBox, new Insets(5, 0, 0, 0));
                     } else {
                         Button button = new Button();
+                        button.setFont(Font.font("Segoe UI Emoji"));
                         button.setText(resultSet.getString(3));
                         button.setMnemonicParsing(false);
-                        button.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
+                        button.setStyle("-fx-text-fill : black; -fx-font-size : 14;");
                         button.setPadding(new Insets(5, 8, 7, 8));
                         button.setOnAction(e -> ouvrir(e));
                         ImageView imageView = new ImageView(new Image(getClass().getResource("images/dossier.png").toString()));
-                        imageView.setFitWidth(28);
-                        imageView.setFitHeight(19);
+                        imageView.setFitWidth(50);
+                        imageView.setFitHeight(50);
                         imageView.setPreserveRatio(true);
                         imageView.setPickOnBounds(true);
                         button.setGraphic(imageView);
@@ -835,6 +869,13 @@ public class Page1Controller implements Initializable {
                 } else {
                     if (resultSet.getBinaryStream(5) == (null)) {
                         Label label1 = new Label();
+                        label1.setWrapText(true);
+                        label1.setAlignment(Pos.CENTER_RIGHT);
+                        label1.setPrefWidth(Region.USE_COMPUTED_SIZE);
+                        label1.setPrefHeight(Region.USE_COMPUTED_SIZE);
+                        label1.setMinHeight(Region.USE_PREF_SIZE);
+                        label1.setMaxWidth(250);
+                        label1.setFont(Font.font("Segoe UI Emoji"));
                         label1.setText(resultSet.getString(3));
                         label1.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
                         label1.setPadding(new Insets(5, 8, 7, 8));
@@ -860,16 +901,15 @@ public class Page1Controller implements Initializable {
                         HBox.setMargin(vBox, new Insets(0, 0, 0, 5));
                     } else {
                         Button button = new Button();
+                        button.setFont(Font.font("Segoe UI Emoji"));
                         button.setText(resultSet.getString(3));
                         button.setMnemonicParsing(false);
                         button.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
                         button.setPadding(new Insets(5, 8, 7, 8));
                         button.setOnAction(e -> ouvrir(e));
                         ImageView imageView = new ImageView(new Image(getClass().getResource("images/dossier.png").toString()));
-                        imageView.setFitWidth(28);
-                        imageView.setFitHeight(19);
-                        imageView.setPreserveRatio(true);
-                        imageView.setPickOnBounds(true);
+                        imageView.setFitWidth(50);
+                        imageView.setFitHeight(50);
                         button.setGraphic(imageView);
                         Label label2 = new Label();
                         label2.setText(resultSet.getString(4));

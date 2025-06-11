@@ -44,6 +44,7 @@
     -fx-background-radius : 10;
     -fx-font-size : 15;
     -fx-text-fill : black;
+    -fx-font-family : "Segoe UI Emoji";
 }
 
 #message_envoyer:hover {
@@ -136,9 +137,9 @@
 }
 
 .label {
-    -fx-font-family : "Cambria Math";
+    -fx-font-family : "Segoe UI Emoji";
     -fx-text-fill : black;
-    -fx-font-size : 14;
+    -fx-font-size : 15;
 }
 
 #abc {
