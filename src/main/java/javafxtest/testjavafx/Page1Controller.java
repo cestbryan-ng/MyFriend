@@ -511,7 +511,7 @@ public class Page1Controller implements Initializable {
                         threadSonnerie = new Thread(() -> {
                             try {
                                 // Essayer de charger un fichier de sonnerie
-                                URL sonnerieUrl = getClass().getResource("/sounds/incoming_call.wav");
+                                URL sonnerieUrl = getClass().getResource("telephone-ring-04.wav");
                                 if (sonnerieUrl != null) {
                                     AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(sonnerieUrl);
                                     Clip clip = AudioSystem.getClip();
@@ -595,11 +595,75 @@ public class Page1Controller implements Initializable {
                 MainPageController.adressre_recepteur_audio = adresse_recepteur;
                 MainPageController.recepteur_video = nom_recepteur;
                 MainPageController.adresse_recepteur_video = adresse_recepteur;
+
                 Platform.runLater(() -> {
+                    // Variables pour la sonnerie
+                    final boolean[] sonnerieActive = {true};
+                    Thread threadSonnerie = null;
+
+                    try {
+                        // Démarrer la sonnerie avant d'afficher l'alerte
+                        threadSonnerie = new Thread(() -> {
+                            try {
+                                // Essayer de charger le même fichier de sonnerie que pour l'audio
+                                URL sonnerieUrl = getClass().getResource("telephone-ring-04.wav");
+                                if (sonnerieUrl != null) {
+                                    AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(sonnerieUrl);
+                                    Clip clip = AudioSystem.getClip();
+                                    clip.open(audioInputStream);
+
+                                    // Jouer en boucle tant que la sonnerie est active
+                                    while (sonnerieActive[0] && !Thread.currentThread().isInterrupted()) {
+                                        clip.setFramePosition(0);
+                                        clip.start();
+
+                                        while (clip.isRunning() && sonnerieActive[0] && !Thread.currentThread().isInterrupted()) {
+                                            Thread.sleep(100);
+                                        }
+
+                                        if (sonnerieActive[0] && !Thread.currentThread().isInterrupted()) {
+                                            Thread.sleep(300);
+                                        }
+                                    }
+                                    clip.close();
+                                } else {
+                                    // Même sonnerie générée que pour l'audio
+                                    genererSonnerieSimple(sonnerieActive);
+                                }
+                            } catch (Exception e) {
+                                // En cas d'erreur, utiliser la même sonnerie que pour l'audio
+                                genererSonnerieSimple(sonnerieActive);
+                            }
+                        });
+                        threadSonnerie.setDaemon(true);
+                        threadSonnerie.start();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    // Créer et afficher l'alerte
                     Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                    alert.setHeaderText(nom_recepteur+ " vous appelle");
-                    alert.setContentText("Appuyer sur OK pour décrocher");
+                    alert.setHeaderText(nom_recepteur + " vous appelle en video");
+                    alert.setContentText("Appuyer sur OK pour décrocher (Appel vidéo)");
+
+                    // Gérer la fermeture de la fenêtre d'alerte
+                    final Thread finalThreadSonnerie = threadSonnerie;
+                    alert.setOnCloseRequest(event -> {
+                        sonnerieActive[0] = false;
+                        if (finalThreadSonnerie != null) {
+                            finalThreadSonnerie.interrupt();
+                        }
+                    });
+
                     Optional<ButtonType> result = alert.showAndWait();
+
+                    // Arrêter la sonnerie dès que l'utilisateur répond
+                    sonnerieActive[0] = false;
+                    if (finalThreadSonnerie != null) {
+                        finalThreadSonnerie.interrupt();
+                    }
+
                     if (result.isPresent() && result.get() == ButtonType.OK) {
                         try {
                             socket_video = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurVideo.NP_PORT);
