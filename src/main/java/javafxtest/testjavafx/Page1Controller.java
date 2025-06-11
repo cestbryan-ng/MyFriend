@@ -20,7 +20,8 @@ import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
-
+import javax.sound.sampled.*;
+import java.net.URL;
 import java.awt.*;
 import java.io.*;
 import java.net.Socket;
@@ -498,11 +499,76 @@ public class Page1Controller implements Initializable {
             } else if (type_envoie.equals("audio")) {
                 MainPageController.recepteur_audio = nom_recepteur;
                 MainPageController.adressre_recepteur_audio = adresse_recepteur;
+
                 Platform.runLater(() -> {
+                    // Variables pour la sonnerie
+                    final boolean[] sonnerieActive = {true};
+                    Thread threadSonnerie = null;
+                    Clip sonnerieClip = null;
+
+                    try {
+                        // Démarrer la sonnerie avant d'afficher l'alerte
+                        threadSonnerie = new Thread(() -> {
+                            try {
+                                // Essayer de charger un fichier de sonnerie
+                                URL sonnerieUrl = getClass().getResource("/sounds/incoming_call.wav");
+                                if (sonnerieUrl != null) {
+                                    AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(sonnerieUrl);
+                                    Clip clip = AudioSystem.getClip();
+                                    clip.open(audioInputStream);
+
+                                    // Jouer en boucle tant que la sonnerie est active
+                                    while (sonnerieActive[0] && !Thread.currentThread().isInterrupted()) {
+                                        clip.setFramePosition(0);
+                                        clip.start();
+
+                                        while (clip.isRunning() && sonnerieActive[0] && !Thread.currentThread().isInterrupted()) {
+                                            Thread.sleep(100);
+                                        }
+
+                                        if (sonnerieActive[0] && !Thread.currentThread().isInterrupted()) {
+                                            Thread.sleep(300);
+                                        }
+                                    }
+                                    clip.close();
+                                } else {
+                                    // Sonnerie générée si pas de fichier
+                                    genererSonnerieSimple(sonnerieActive);
+                                }
+                            } catch (Exception e) {
+                                // En cas d'erreur, utiliser la sonnerie simple
+                                genererSonnerieSimple(sonnerieActive);
+                            }
+                        });
+                        threadSonnerie.setDaemon(true);
+                        threadSonnerie.start();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    // Créer et afficher l'alerte
                     Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                    alert.setHeaderText(nom_recepteur+ " vous appelle");
+                    alert.setHeaderText(nom_recepteur + " vous appelle");
                     alert.setContentText("Appuyer sur OK pour décrocher");
+
+                    // Gérer la fermeture de la fenêtre d'alerte
+                    final Thread finalThreadSonnerie = threadSonnerie;
+                    alert.setOnCloseRequest(event -> {
+                        sonnerieActive[0] = false;
+                        if (finalThreadSonnerie != null) {
+                            finalThreadSonnerie.interrupt();
+                        }
+                    });
+
                     Optional<ButtonType> result = alert.showAndWait();
+
+                    // Arrêter la sonnerie dès que l'utilisateur répond
+                    sonnerieActive[0] = false;
+                    if (finalThreadSonnerie != null) {
+                        finalThreadSonnerie.interrupt();
+                    }
+
                     if (result.isPresent() && result.get() == ButtonType.OK) {
                         try {
                             socket_audio = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
@@ -1070,6 +1136,52 @@ public class Page1Controller implements Initializable {
         } else {
             emojiPopup.hide();
         }
+    }
+
+    private void genererSonnerieSimple(boolean[] sonnerieActive) {
+        try {
+            AudioFormat format = new AudioFormat(44100, 16, 1, true, false);
+            SourceDataLine line = AudioSystem.getSourceDataLine(format);
+            line.open(format);
+            line.start();
+
+            while (sonnerieActive[0] && !Thread.currentThread().isInterrupted()) {
+                // Pattern de sonnerie : 2 bips rapides + pause
+                byte[] bip = genererBipSimple(950, 0.4, format);
+
+                // Premier bip
+                line.write(bip, 0, bip.length);
+                if (!sonnerieActive[0]) break;
+                Thread.sleep(150);
+
+                // Deuxième bip
+                line.write(bip, 0, bip.length);
+                if (!sonnerieActive[0]) break;
+
+                // Pause longue
+                Thread.sleep(1800);
+            }
+
+            line.drain();
+            line.close();
+        } catch (Exception e) {
+            // Ignorer les erreurs de sonnerie
+        }
+    }
+
+    private byte[] genererBipSimple(int frequence, double duree, AudioFormat format) {
+        int numSamples = (int) (duree * format.getSampleRate());
+        byte[] buffer = new byte[numSamples * 2];
+
+        for (int i = 0; i < numSamples; i++) {
+            double angle = 2.0 * Math.PI * i * frequence / format.getSampleRate();
+            short sample = (short) (Math.sin(angle) * 32767 * 0.5); // Volume à 50%
+
+            buffer[i * 2] = (byte) (sample & 0xFF);
+            buffer[i * 2 + 1] = (byte) ((sample >> 8) & 0xFF);
+        }
+
+        return buffer;
     }
 
 }
