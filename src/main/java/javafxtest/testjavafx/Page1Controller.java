@@ -322,12 +322,11 @@ public class Page1Controller implements Initializable {
                         Label label = new Label();
                         label.setText(nom_recepteur + " vous a envoyé un nouveau message.");
                         label.setPadding(new Insets(40, 0, 40, 0));
-                        label.setStyle("-fx-text-fill : \"white\"; -fx-font-family : \"Cambria Math\"; -fx-font-size : 14;");
+                        label.setStyle("-fx-text-fill : \"white\"; -fx-font-family : \"Cambria Math\"; -fx-font-size : 15;");
                         messagePopup = new Popup();
                         FlowPane messagePane = new FlowPane();
-                        messagePane.setStyle("-fx-background-color : \"lightblue\"; -fx-background-radius : 10; ");
+                        messagePane.setStyle("-fx-background-color : \"lightblue\"; -fx-background-radius : 20; ");
                         messagePane.setAlignment(Pos.CENTER);
-                        messagePane.setPadding(new Insets(4, 4, 4, 4));
                         messagePane.getChildren().add(label);
                         messagePopup.getContent().add(messagePane);
                         messagePopup.setAutoHide(true);
@@ -734,12 +733,7 @@ public class Page1Controller implements Initializable {
     }
 
     @FXML
-    void Video() throws IOException {
-        MainPageController.adressre_recepteur_audio = MainPageController.adresse_recepteur;
-        MainPageController.recepteur_audio = MainPageController.recepteur;
-        MainPageController.adresse_recepteur_video = MainPageController.adresse_recepteur;
-        MainPageController.recepteur_video = MainPageController.recepteur;
-
+    void Video() {
         if (MainPageController.enligne.equals("offline")) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setHeaderText("Pas possible d'effectuer l'appel");
@@ -747,6 +741,11 @@ public class Page1Controller implements Initializable {
             alert.show();
             return;
         }
+
+        MainPageController.adressre_recepteur_audio = MainPageController.adresse_recepteur;
+        MainPageController.recepteur_audio = MainPageController.recepteur;
+        MainPageController.adresse_recepteur_video = MainPageController.adresse_recepteur;
+        MainPageController.recepteur_video = MainPageController.recepteur;
 
         try {
             socket_video = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurVideo.NP_PORT);
@@ -761,22 +760,21 @@ public class Page1Controller implements Initializable {
             MainPageController.out.writeUTF(MainPageController.adresse_recepteur);
             MainPageController.out.writeUTF(MainPageController.nomutilisateur);
             MainPageController.out.writeUTF("video");
+
+            FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("Page1Video.fxml"));
+            Scene scene = new Scene(fxmlLoader.load(), 930, 410);
+            scene.getStylesheets().add(getClass().getResource("Page1VideoUI.css").toExternalForm());
+            Stage stage = new Stage();
+            stage.setTitle("MonApp");
+            stage.setScene(scene);
+            stage.show();
         } catch (IOException e) {
             e.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setHeaderText("Erreur");
             alert.setContentText("L'appel n'a pas pu démarrer");
             alert.show();
-            return;
         }
-
-        FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("Page1Video.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 930, 410);
-        scene.getStylesheets().add(getClass().getResource("Page1VideoUI.css").toExternalForm());
-        Stage stage = new Stage();
-        stage.setTitle("MonApp");
-        stage.setScene(scene);
-        stage.show();
     }
 
     @FXML
@@ -877,7 +875,7 @@ public class Page1Controller implements Initializable {
                         label1.setMaxWidth(250);
                         label1.setFont(Font.font("Segoe UI Emoji"));
                         label1.setText(resultSet.getString(3));
-                        label1.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
+                        label1.setStyle("-fx-text-fill : black; -fx-font-size : 14;");
                         label1.setPadding(new Insets(5, 8, 7, 8));
                         Label label2 = new Label();
                         label2.setText(resultSet.getString(4));
@@ -904,7 +902,7 @@ public class Page1Controller implements Initializable {
                         button.setFont(Font.font("Segoe UI Emoji"));
                         button.setText(resultSet.getString(3));
                         button.setMnemonicParsing(false);
-                        button.setStyle("-fx-font-family : \"Cambria Math\"; -fx-text-fill : black; -fx-font-size : 14;");
+                        button.setStyle("-fx-text-fill : black; -fx-font-size : 14;");
                         button.setPadding(new Insets(5, 8, 7, 8));
                         button.setOnAction(e -> ouvrir(e));
                         ImageView imageView = new ImageView(new Image(getClass().getResource("images/dossier.png").toString()));
