@@ -314,10 +314,9 @@ public class Page1Controller implements Initializable {
                         label.setPadding(new Insets(40, 0, 40, 0));
                         label.setStyle("-fx-text-fill : \"white\"; -fx-font-family : \"Cambria Math\"; -fx-font-size : 14;");
                         messagePopup = new Popup();
-                        HBox messagePane = new HBox();
+                        FlowPane messagePane = new FlowPane();
                         messagePane.setStyle("-fx-background-color : \"lightblue\"; -fx-background-radius : 10; ");
                         messagePane.setAlignment(Pos.CENTER);
-                        messagePane.setPrefHeight(10);
                         messagePane.setPadding(new Insets(0, 10, 0, 10));
                         messagePane.getChildren().add(label);
                         messagePopup.getContent().add(messagePane);
