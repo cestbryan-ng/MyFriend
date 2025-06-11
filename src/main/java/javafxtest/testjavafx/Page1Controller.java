@@ -109,7 +109,7 @@ public class Page1Controller implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         new Thread(this::Recevoir).start();
 
-        String[] emojis = {"👍", "💘", "👎", "😂", "😎", "😅", "🖖"};
+        String[] emojis = {"👍", "💘", "👎", "😂", "😎", "😅", "🖖", "\uD83D\uDE01", "🥺", "\uD83D\uDE07", "\uD83D\uDE30", "\uD83D\uDE25", "😴", "😙", "😍", "🤑"};
         emojiPopup = new Popup();
         FlowPane emojiPane = new FlowPane();
         emojiPane.setStyle("-fx-background-color : \"lightblue\" ");
@@ -317,7 +317,7 @@ public class Page1Controller implements Initializable {
                         FlowPane messagePane = new FlowPane();
                         messagePane.setStyle("-fx-background-color : \"lightblue\"; -fx-background-radius : 10; ");
                         messagePane.setAlignment(Pos.CENTER);
-                        messagePane.setPadding(new Insets(0, 10, 0, 10));
+                        messagePane.setPadding(new Insets(4, 4, 4, 4));
                         messagePane.getChildren().add(label);
                         messagePopup.getContent().add(messagePane);
                         messagePopup.setAutoHide(true);
