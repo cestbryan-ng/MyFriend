@@ -511,7 +511,7 @@ public class Page1Controller implements Initializable {
                         threadSonnerie = new Thread(() -> {
                             try {
                                 // Essayer de charger un fichier de sonnerie
-                                URL sonnerieUrl = getClass().getResource("telephone-ring-04.wav");
+                                URL sonnerieUrl = getClass().getResource("telephone-ring-0.wav");
                                 if (sonnerieUrl != null) {
                                     AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(sonnerieUrl);
                                     Clip clip = AudioSystem.getClip();
@@ -606,7 +606,7 @@ public class Page1Controller implements Initializable {
                         threadSonnerie = new Thread(() -> {
                             try {
                                 // Essayer de charger le même fichier de sonnerie que pour l'audio
-                                URL sonnerieUrl = getClass().getResource("telephone-ring-04.wav");
+                                URL sonnerieUrl = getClass().getResource("telephone-ring-0.wav");
                                 if (sonnerieUrl != null) {
                                     AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(sonnerieUrl);
                                     Clip clip = AudioSystem.getClip();

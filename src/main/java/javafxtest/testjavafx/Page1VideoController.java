@@ -154,9 +154,7 @@ public class Page1VideoController implements Initializable {
                     int bytesRead = Page1Controller.in_audio.read(buffer);
                     speaker.write(buffer, 0, bytesRead);
                 } catch (SocketTimeoutException e) {
-                    encours = false;
-                    stopAndClose();
-                    break;
+
                 }
             }
         } catch (IOException | LineUnavailableException e) {

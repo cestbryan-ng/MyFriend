@@ -82,7 +82,7 @@ public class Page1AppelController implements Initializable {
         threadSonnerie = new Thread(() -> {
             try {
                 // Charger le fichier de sonnerie (vous devez avoir ce fichier dans vos ressources)
-                URL sonnerieUrl = getClass().getResource("telephone-ring-04.wav");
+                URL sonnerieUrl = getClass().getResource("telephone-ring-0.wav");
                 if (sonnerieUrl != null) {
                     AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(sonnerieUrl);
                     sonnerieClip = AudioSystem.getClip();
