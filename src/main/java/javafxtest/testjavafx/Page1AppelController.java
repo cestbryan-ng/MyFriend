@@ -130,7 +130,7 @@ public class Page1AppelController implements Initializable {
 
                 // Pause de 1 seconde
                 if (appelEnCours && !Thread.currentThread().isInterrupted()) {
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                 }
 
                 // Deuxième bip
@@ -138,7 +138,7 @@ public class Page1AppelController implements Initializable {
 
                 // Pause plus longue entre les cycles
                 if (appelEnCours && !Thread.currentThread().isInterrupted()) {
-                    Thread.sleep(2000);
+                    Thread.sleep(500);
                 }
             }
 

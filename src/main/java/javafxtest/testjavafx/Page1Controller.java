@@ -1223,7 +1223,7 @@ public class Page1Controller implements Initializable {
                 if (!sonnerieActive[0]) break;
 
                 // Pause longue
-                Thread.sleep(1800);
+                Thread.sleep(500);
             }
 
             line.drain();
