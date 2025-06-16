@@ -1,9 +1,11 @@
 #pane1 {
-    -fx-background-color : #111010;
+    -fx-background-color : "#007567";
 }
 
 #pane2 {
-    -fx-background-color : #141725;
+    -fx-background-color : "#00EFD1";
+    -fx-border-width : 0 1 0 0;
+    -fx-border-color : "black";
 }
 
 #pane3 {
@@ -32,7 +34,7 @@
 }
 
 #recherche_conversation {
-    -fx-background-color : #3d3c3c;
+    -fx-background-color : "white";
     -fx-text-fill : white;
     -fx-font-weight : bold;
     -fx-font-size : 13;
@@ -57,7 +59,7 @@
 }
 
 #vbox1 {
-    -fx-background-color : #141725;
+    -fx-background-color : #00EFD1;
 }
 
 #vbox2 {
@@ -80,7 +82,7 @@
 }
 
 #button_exit {
-    -fx-background-color : #111010;
+    -fx-background-color : transparent;
     -fx-cursor : hand;
 }
 
@@ -104,12 +106,16 @@
     -fx-background-radius: 8;
     -fx-border-radius: 8;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 3, 0, 0, 1);
+    -fx-text-fill : "black";
 }
 
 #button_test1, #button_test2 {
-    -fx-text-fill : white;
-    -fx-border-color : gray;
-    -fx-border-width : 0 0 0.1 0;
+    -fx-font-family : "Segoe UI Emoji";
+    -fx-font-weight : bold;
+    -fx-text-fill : "black";
+    -fx-border-color : "black";
+    -fx-border-width : 0 0 1 0;
+    -fx-border-radius : 0;
 }
 
 #message_a_envoyer, #message_recue {
@@ -127,19 +133,19 @@
 }
 
 #mes {
-    -fx-background-color : "#e7961c";
+    -fx-background-color : "white";
     -fx-background-radius : 10;
-    -fx-border-color : "white";
+    -fx-border-color : "#EBE8E8";
     -fx-border-radius : 8;
-    -fx-border-width : 3;
+    -fx-border-width : 2;
 }
 
 #mmes {
-    -fx-background-color : "#67fd30";
+    -fx-background-color : "#00EFD1";
     -fx-background-radius : 10;
-    -fx-border-color : "white";
+    -fx-border-color : "#00B39C";
     -fx-border-radius : 8;
-    -fx-border-width : 3;
+    -fx-border-width : 2;
 }
 
 .label {

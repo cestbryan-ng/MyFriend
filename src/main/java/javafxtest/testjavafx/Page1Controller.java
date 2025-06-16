@@ -152,9 +152,11 @@ public class Page1Controller implements Initializable {
                 imageView.setFitHeight(47);
                 imageView.setPreserveRatio(true);
                 button.setGraphic(imageView);
-                button.setStyle("-fx-text-fill : white; -fx-border-color : gray; -fx-border-width : 0 0 0.1 0; -fx-cursor : hand;");
+                button.setAlignment(Pos.CENTER_LEFT);
+                button.setStyle("-fx-font-family : \"Segoe UI Emoji\"; -fx-border-color : \"black\";; -fx-border-width : 0 0 1 0; -fx-cursor : hand; -fx-border-radius : 0; -fx-font-weight : bold;");
                 button.setOnAction(event -> Charger(event));
                 vbox1.getChildren().add(button);
+                button.setPadding(new Insets(0, 0, 0, 15));
                 vbox1.setAlignment(Pos.TOP_CENTER);
 
                 if (numero == 0) numero++;
@@ -294,7 +296,7 @@ public class Page1Controller implements Initializable {
         vBox.getChildren().add(label1);
         vBox.getChildren().add(label2);
         vBox.setAlignment(Pos.CENTER_RIGHT);
-        vBox.setStyle("-fx-background-color : \"#67fd30\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
+        vBox.setStyle("-fx-background-color : \"#00EFD1\"; -fx-background-radius : 10; -fx-border-color : \"#00B39C\"; -fx-border-radius : 8; -fx-border-width : 3;");
         HBox hBox = new HBox();
         vbox2.getChildren().add(hBox);
         hBox.getChildren().add(vBox);
@@ -403,7 +405,7 @@ public class Page1Controller implements Initializable {
                                         vBox.getChildren().add(button);
                                         vBox.getChildren().add(label2);
                                         vBox.setAlignment(Pos.CENTER_RIGHT);
-                                        vBox.setStyle("-fx-background-color : \"#67fd30\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
+                                        vBox.setStyle("-fx-background-color : \"white\"; -fx-background-radius : 10; -fx-border-color : \"#EBE8E8\"; -fx-border-radius : 8; -fx-border-width : 3;");
                                         HBox hBox = new HBox();
                                         vbox2.getChildren().add(hBox);
                                         hBox.getChildren().add(vBox);
@@ -433,7 +435,7 @@ public class Page1Controller implements Initializable {
                                         vBox.getChildren().add(label1);
                                         vBox.getChildren().add(label2);
                                         vBox.setAlignment(Pos.CENTER_RIGHT);
-                                        vBox.setStyle("-fx-background-color : \"#e7961c\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
+                                        vBox.setStyle("-fx-background-color : \"white\"; -fx-background-radius : 10; -fx-border-color : \"#EBE8E8\"; -fx-border-radius : 8; -fx-border-width : 3;");
                                         HBox hBox = new HBox();
                                         ImageView imageView1 = new ImageView(new Image(getClass().getResource("images/cercle0.png").toString()));
                                         imageView1.setFitWidth(40);
@@ -470,7 +472,7 @@ public class Page1Controller implements Initializable {
                                         vBox.getChildren().add(button);
                                         vBox.getChildren().add(label2);
                                         vBox.setAlignment(Pos.CENTER_RIGHT);
-                                        vBox.setStyle("-fx-background-color : \"#e7961c\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
+                                        vBox.setStyle("-fx-background-color : \"white\"; -fx-background-radius : 10; -fx-border-color : \"#EBE8E8\"; -fx-border-radius : 8; -fx-border-width : 3;");
                                         HBox hBox = new HBox();
                                         ImageView imageView1 = new ImageView(new Image(getClass().getResource("images/cercle0.png").toString()));
                                         imageView1.setFitWidth(40);
@@ -810,7 +812,7 @@ public class Page1Controller implements Initializable {
             vBox.getChildren().add(button);
             vBox.getChildren().add(label2);
             vBox.setAlignment(Pos.CENTER_RIGHT);
-            vBox.setStyle("-fx-background-color : \"#67fd30\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
+            vBox.setStyle("-fx-background-color : \"white\"; -fx-background-radius : 10; -fx-border-color : \"#EBE8E8\"; -fx-border-radius : 8; -fx-border-width : 3;");
             HBox hBox = new HBox();
             vbox2.getChildren().add(hBox);
             hBox.getChildren().add(vBox);
@@ -959,7 +961,7 @@ public class Page1Controller implements Initializable {
                         vBox.getChildren().add(label1);
                         vBox.getChildren().add(label2);
                         vBox.setAlignment(Pos.CENTER_RIGHT);
-                        vBox.setStyle("-fx-background-color : \"#67fd30\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
+                        vBox.setStyle("-fx-background-color : \"#00EFD1\"; -fx-background-radius : 10; -fx-border-color : \"#00B39C\"; -fx-border-radius : 8; -fx-border-width : 3;");
                         HBox hBox = new HBox();
                         vbox2.getChildren().add(hBox);
                         hBox.getChildren().add(vBox);
@@ -987,7 +989,7 @@ public class Page1Controller implements Initializable {
                         vBox.getChildren().add(button);
                         vBox.getChildren().add(label2);
                         vBox.setAlignment(Pos.CENTER_RIGHT);
-                        vBox.setStyle("-fx-background-color : \"#67fd30\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
+                        vBox.setStyle("-fx-background-color : \"#00EFD1\"; -fx-background-radius : 10; -fx-border-color : \"#00B39C\"; -fx-border-radius : 8; -fx-border-width : 3;");
                         HBox hBox = new HBox();
                         vbox2.getChildren().add(hBox);
                         hBox.getChildren().add(vBox);
@@ -1015,7 +1017,7 @@ public class Page1Controller implements Initializable {
                         vBox.getChildren().add(label1);
                         vBox.getChildren().add(label2);
                         vBox.setAlignment(Pos.CENTER_RIGHT);
-                        vBox.setStyle("-fx-background-color : \"#e7961c\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
+                        vBox.setStyle("-fx-background-color : \"white\"; -fx-background-radius : 10; -fx-border-color : \"#EBE8E8\"; -fx-border-radius : 8; -fx-border-width : 3;");
                         HBox hBox = new HBox();
                         ImageView imageView = new ImageView(new Image(getClass().getResource("images/cercle0.png").toString()));
                         imageView.setFitWidth(40);
@@ -1047,7 +1049,7 @@ public class Page1Controller implements Initializable {
                         vBox.getChildren().add(button);
                         vBox.getChildren().add(label2);
                         vBox.setAlignment(Pos.CENTER_RIGHT);
-                        vBox.setStyle("-fx-background-color : \"#e7961c\"; -fx-background-radius : 10; -fx-border-color : \"white\"; -fx-border-radius : 8; -fx-border-width : 3;");
+                        vBox.setStyle("-fx-background-color : \"white\"; -fx-background-radius : 10; -fx-border-color : \"#EBE8E8\"; -fx-border-radius : 8; -fx-border-width : 3;");
                         HBox hBox = new HBox();
                         ImageView imageView1 = new ImageView(new Image(getClass().getResource("images/cercle0.png").toString()));
                         imageView1.setFitWidth(40);
@@ -1114,7 +1116,9 @@ public class Page1Controller implements Initializable {
                 imageView.setFitHeight(47);
                 imageView.setPreserveRatio(true);
                 button.setGraphic(imageView);
-                button.setStyle("-fx-text-fill : white; -fx-border-color : gray; -fx-border-width : 0 0 0.1 0; -fx-cursor : hand;");
+                button.setPadding(new Insets(0, 0, 0, 15));
+                button.setAlignment(Pos.CENTER_LEFT);
+                button.setStyle("-fx-font-family : \"Segoe UI Emoji\"; -fx-border-color : \"black\";; -fx-border-width : 0 0 1 0; -fx-cursor : hand; -fx-border-radius : 0; -fx-font-weight : bold;");
                 button.setOnAction(event -> Charger(event));
                 vbox1.getChildren().add(button);
 
