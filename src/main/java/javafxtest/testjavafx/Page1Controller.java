@@ -797,8 +797,8 @@ public class Page1Controller implements Initializable {
             button.setPadding(new Insets(5, 8, 7, 8));
             button.setOnAction(e -> ouvrir(e));
             ImageView imageView = new ImageView(new Image(getClass().getResource("images/dossier.png").toString()));
-            imageView.setFitWidth(28);
-            imageView.setFitHeight(19);
+            imageView.setFitWidth(50);
+            imageView.setFitHeight(50);
             imageView.setPreserveRatio(true);
             imageView.setPickOnBounds(true);
             button.setGraphic(imageView);
