@@ -37,10 +37,9 @@ public class Page1AppelController implements Initializable {
     private Stage stage;
     private Clip sonnerieClip;
 
-    // Variables pour le monitoring audio
+    // Statistiques simples (optionnel)
     private long audioPacketsSent = 0;
     private long audioPacketsReceived = 0;
-    private long lastStatsTime = 0;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -54,87 +53,53 @@ public class Page1AppelController implements Initializable {
         // Démarrer la sonnerie d'appel
         demarrerSonnerie();
 
-        // Initialiser les composants audio
-        if (!initializeAudio()) {
-            logger.severe("Échec initialisation audio");
+        threadReception = new Thread(this::recevoir);
+        threadReception.setName("AudioReceiver");
+        threadReception.start();
+
+        try {
+            Page1Controller.out_audio.writeUTF(MainPageController.adressre_recepteur_audio);
+            micro = (TargetDataLine) AudioSystem.getLine(info);
+
+            // CRUCIAL: Pas de buffer spécifié pour éviter la latence
+            micro.open(format);
+            micro.start();
+
+            logger.info("Audio initialisé - format: " + format);
+        } catch (LineUnavailableException | IOException e) {
+            logger.log(Level.SEVERE, "Erreur initialisation audio", e);
             encours = false;
             appelEnCours = false;
             arreterSonnerie();
-            fermerFenetre();
             return;
         }
 
-        // Démarrer les threads
-        startThreads();
-    }
+        threadEmission = new Thread(() -> {
+            byte[] buffer = new byte[1024];
+            logger.fine("Démarrage émission audio");
 
-    private boolean initializeAudio() {
-        try {
-            // Vérifier support du format audio
-            if (!AudioSystem.isLineSupported(info)) {
-                logger.warning("Format audio non supporté");
-                return false;
+            while (encours && !Thread.currentThread().isInterrupted()) {
+                int bytesRead = micro.read(buffer, 0, buffer.length);
+                try {
+                    // SIMPLE et DIRECT - pas de synchronized ni flush
+                    Page1Controller.out_audio.write(buffer, 0, bytesRead);
+                    audioPacketsSent++;
+                } catch (IOException e) {
+                    if (encours) {
+                        logger.log(Level.WARNING, "Erreur émission audio", e);
+                    }
+                    encours = false;
+                    appelEnCours = false;
+                    arreterSonnerie();
+                    Platform.runLater(this::fermerFenetre);
+                    break;
+                }
             }
-
-            // Envoyer l'adresse de destination
-            Page1Controller.out_audio.writeUTF(MainPageController.adressre_recepteur_audio);
-
-            // Initialiser le microphone
-            micro = (TargetDataLine) AudioSystem.getLine(info);
-            micro.open(format, 4096); // Buffer réduit pour moins de latence
-            micro.start();
-
-            logger.info("Audio initialisé avec succès");
-            return true;
-
-        } catch (LineUnavailableException | IOException e) {
-            logger.log(Level.SEVERE, "Erreur initialisation audio", e);
-            return false;
-        }
-    }
-
-    private void startThreads() {
-        threadReception = new Thread(this::recevoir);
-        threadReception.setName("AudioReceiver");
-        threadReception.setPriority(Thread.MAX_PRIORITY);
-        threadReception.start();
-
-        threadEmission = new Thread(this::emettre);
+            logger.fine("Arrêt émission audio - paquets envoyés: " + audioPacketsSent);
+        });
         threadEmission.setName("AudioSender");
-        threadEmission.setPriority(Thread.MAX_PRIORITY);
         threadEmission.setDaemon(true);
         threadEmission.start();
-
-        logger.info("Threads audio démarrés");
-    }
-
-    private void emettre() {
-        byte[] buffer = new byte[1024];
-        logger.info("Démarrage émission audio");
-
-        while (encours && !Thread.currentThread().isInterrupted()) {
-            try {
-                int bytesRead = micro.read(buffer, 0, buffer.length);
-                if (bytesRead > 0) {
-                    synchronized (Page1Controller.out_audio) {
-                        Page1Controller.out_audio.write(buffer, 0, bytesRead);
-                        Page1Controller.out_audio.flush();
-                    }
-                    audioPacketsSent++;
-                }
-            } catch (IOException e) {
-                if (encours) {
-                    logger.log(Level.SEVERE, "Erreur émission audio", e);
-                }
-                encours = false;
-                appelEnCours = false;
-                arreterSonnerie();
-                Platform.runLater(this::fermerFenetre);
-                break;
-            }
-        }
-
-        logger.info("Arrêt émission audio");
     }
 
     private void demarrerSonnerie() {
@@ -147,26 +112,28 @@ public class Page1AppelController implements Initializable {
                     sonnerieClip = AudioSystem.getClip();
                     sonnerieClip.open(audioInputStream);
 
-                    // Jouer en boucle
+                    // Jouer en boucle tant que l'appel n'est pas décroché
                     while (appelEnCours && !Thread.currentThread().isInterrupted()) {
                         sonnerieClip.setFramePosition(0);
                         sonnerieClip.start();
 
+                        // Attendre que le clip se termine avant de le rejouer
                         while (sonnerieClip.isRunning() && appelEnCours && !Thread.currentThread().isInterrupted()) {
                             Thread.sleep(100);
                         }
 
+                        // Pause entre les sonneries
                         if (appelEnCours && !Thread.currentThread().isInterrupted()) {
                             Thread.sleep(1000);
                         }
                     }
                 } else {
-                    // Sonnerie générée si pas de fichier
+                    // Si pas de fichier de sonnerie, générer un bip simple
                     genererSonnerieSimple();
                 }
             } catch (UnsupportedAudioFileException | IOException | LineUnavailableException | InterruptedException e) {
                 if (appelEnCours) {
-                    logger.log(Level.WARNING, "Erreur sonnerie, utilisation sonnerie simple", e);
+                    logger.log(Level.FINE, "Sonnerie fichier non disponible, utilisation sonnerie simple", e);
                     genererSonnerieSimple();
                 }
             }
@@ -184,20 +151,19 @@ public class Page1AppelController implements Initializable {
             line.start();
 
             while (appelEnCours && !Thread.currentThread().isInterrupted()) {
-                // Générer pattern de sonnerie : 2 bips + pause
-                byte[] bipData = genererBip(950, 0.4, formatBip);
-
-                // Premier bip
+                // Générer un bip de 800Hz pendant 0.5 seconde
+                byte[] bipData = genererBip(800, 0.5, formatBip);
                 line.write(bipData, 0, bipData.length);
-                if (!appelEnCours) break;
-                Thread.sleep(150);
+
+                // Pause de 1 seconde
+                if (appelEnCours && !Thread.currentThread().isInterrupted()) {
+                    Thread.sleep(500);
+                }
 
                 // Deuxième bip
                 line.write(bipData, 0, bipData.length);
-                if (!appelEnCours) break;
-                Thread.sleep(300);
 
-                // Pause longue
+                // Pause plus longue entre les cycles
                 if (appelEnCours && !Thread.currentThread().isInterrupted()) {
                     Thread.sleep(500);
                 }
@@ -206,18 +172,19 @@ public class Page1AppelController implements Initializable {
             line.drain();
             line.close();
         } catch (LineUnavailableException | InterruptedException e) {
-            logger.log(Level.FINE, "Arrêt sonnerie simple", e);
+            logger.fine("Arrêt sonnerie simple");
         }
     }
 
     private byte[] genererBip(int frequence, double duree, AudioFormat format) {
         int numSamples = (int) (duree * format.getSampleRate());
-        byte[] buffer = new byte[numSamples * 2];
+        byte[] buffer = new byte[numSamples * 2]; // 16 bits = 2 bytes
 
         for (int i = 0; i < numSamples; i++) {
             double angle = 2.0 * Math.PI * i * frequence / format.getSampleRate();
-            short sample = (short) (Math.sin(angle) * 32767 * 0.4); // Volume à 40%
+            short sample = (short) (Math.sin(angle) * 32767 * 0.3); // Volume à 30%
 
+            // Conversion en little-endian
             buffer[i * 2] = (byte) (sample & 0xFF);
             buffer[i * 2 + 1] = (byte) ((sample >> 8) & 0xFF);
         }
@@ -237,7 +204,7 @@ public class Page1AppelController implements Initializable {
             sonnerieClip.close();
         }
 
-        logger.info("Sonnerie arrêtée");
+        logger.fine("Sonnerie arrêtée");
     }
 
     @FXML
@@ -271,7 +238,8 @@ public class Page1AppelController implements Initializable {
         threadTimer.setDaemon(true);
 
         try (SourceDataLine sortie_audio = AudioSystem.getSourceDataLine(format)) {
-            sortie_audio.open(format, 4096);
+            // CRUCIAL: Pas de buffer spécifié pour éviter la latence
+            sortie_audio.open(format);
             sortie_audio.start();
             byte[] buffer = new byte[1024];
 
@@ -279,32 +247,29 @@ public class Page1AppelController implements Initializable {
 
             while (encours && !Thread.currentThread().isInterrupted()) {
                 try {
-                    int bytesRead = Page1Controller.in_audio.read(buffer);
-                    if (bytesRead > 0) {
-                        sortie_audio.write(buffer, 0, bytesRead);
+                    int byte_lue = Page1Controller.in_audio.read(buffer);
+                    if (byte_lue > 0) {
+                        sortie_audio.write(buffer, 0, byte_lue);
                         audioPacketsReceived++;
 
-                        if (!threadTimer.isAlive()) {
-                            // L'autre personne a décroché
+                        if (!(threadTimer.isAlive())) {
+                            // L'autre personne a décroché, arrêter la sonnerie
                             appelEnCours = false;
                             arreterSonnerie();
                             threadTimer.start();
 
-                            // Configurer timeout pour détecter déconnexion
-                            Page1Controller.socket_audio.setSoTimeout(5000);
-
-                            logger.info("Communication établie");
+                            // CRUCIAL: Timeout court pour détecter déconnexions rapidement
+                            Page1Controller.socket_audio.setSoTimeout(500);
+                            logger.info("Communication établie - timeout configuré");
                         }
                     }
                 } catch (SocketTimeoutException e) {
-                    if (threadTimer.isAlive()) {
-                        // Timeout pendant la communication = déconnexion
-                        logger.info("Timeout - fin de communication");
-                        encours = false;
-                        appelEnCours = false;
-                        arreterSonnerie();
-                        Platform.runLater(this::fermerFenetre);
-                    }
+                    // Timeout = déconnexion détectée
+                    logger.info("Timeout détecté - fin de communication");
+                    encours = false;
+                    appelEnCours = false;
+                    arreterSonnerie();
+                    Platform.runLater(this::fermerFenetre);
                 } catch (IOException e) {
                     if (encours) {
                         logger.log(Level.WARNING, "Erreur réception audio", e);
@@ -313,13 +278,13 @@ public class Page1AppelController implements Initializable {
                 }
             }
         } catch (LineUnavailableException e) {
-            logger.log(Level.SEVERE, "Erreur système audio", e);
+            logger.log(Level.SEVERE, "Erreur système audio réception", e);
         } finally {
             encours = false;
             appelEnCours = false;
             arreterSonnerie();
             Platform.runLater(this::fermerFenetre);
-            logger.info("Arrêt réception audio");
+            logger.info("Arrêt réception audio - paquets reçus: " + audioPacketsReceived);
         }
     }
 
@@ -328,29 +293,26 @@ public class Page1AppelController implements Initializable {
         arreterSonnerie();
 
         // Log des statistiques finales
-        logger.info(String.format("Statistiques appel: %d paquets envoyés, %d reçus",
+        logger.info(String.format("Fin d'appel - Statistiques: %d paquets envoyés, %d reçus",
                 audioPacketsSent, audioPacketsReceived));
 
         try {
-            // Fermeture audio
             if (micro != null && micro.isActive()) {
                 micro.stop();
                 micro.close();
             }
 
-            // Fermeture connexions
             if (Page1Controller.in_audio != null) Page1Controller.in_audio.close();
             if (Page1Controller.out_audio != null) Page1Controller.out_audio.close();
             if (Page1Controller.socket_audio != null) Page1Controller.socket_audio.close();
 
-            // Arrêt threads
             if (threadEmission != null) threadEmission.interrupt();
             if (threadReception != null) threadReception.interrupt();
             if (threadTimer != null) threadTimer.interrupt();
             if (threadSonnerie != null) threadSonnerie.interrupt();
 
         } catch (IOException e) {
-            logger.log(Level.WARNING, "Erreur fermeture ressources", e);
+            logger.log(Level.WARNING, "Erreur fermeture ressources audio", e);
         }
 
         Platform.runLater(() -> {

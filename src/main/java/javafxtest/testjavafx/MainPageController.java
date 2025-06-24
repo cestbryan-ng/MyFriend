@@ -115,6 +115,7 @@ public class MainPageController {
                         } catch (IOException | SQLException err) {
                         }
                     });
+                    stage.setResizable(false);
                     stage.show();
                     Stage stage1 = (Stage) anchorpane1.getScene().getWindow();
                     stage1.close();
@@ -141,6 +142,7 @@ public class MainPageController {
         Stage stage = new Stage();
         stage.setTitle("MonApp");
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
         Stage stage1 = (Stage) anchorpane1.getScene().getWindow();
         stage1.close();

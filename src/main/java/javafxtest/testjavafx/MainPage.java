@@ -25,6 +25,7 @@ public class MainPage extends Application {
         scene.getStylesheets().add(getClass().getResource("MainPageUI.css").toExternalForm());
         stage.setTitle("MonApp");
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
     }
 
