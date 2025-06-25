@@ -16,6 +16,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Popup;
@@ -108,6 +109,19 @@ public class Page1Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         new Thread(this::Recevoir).start();
+
+        message_envoyer.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                if (event.isShiftDown()) {
+                    // Shift+Entrée = nouvelle ligne (comportement par défaut)
+                    // Ne rien faire, laisser JavaFX gérer
+                } else {
+                    // Entrée seule = envoyer le message
+                    event.consume(); // Empêcher le comportement par défaut
+                    Envoie(new ActionEvent());
+                }
+            }
+        });
 
         String[] emojis = {"👍", "❤", "👎", "😂", "😎", "😅", "🖖", "\uD83D\uDE01", "🥺", "\uD83D\uDE07", "\uD83D\uDE30", "\uD83D\uDE25", "😴", "😙", "😍", "🤑", "🙃", "🤬"};
         emojiPopup = new Popup();
