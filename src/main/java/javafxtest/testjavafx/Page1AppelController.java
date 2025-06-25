@@ -37,6 +37,10 @@ public class Page1AppelController implements Initializable {
     private Stage stage;
     private Clip sonnerieClip;
 
+    // VARIABLES DE SYNCHRONISATION
+    private volatile boolean readyToStart = false;
+    private volatile boolean otherPersonReady = false;
+
     // Statistiques simples (optionnel)
     private long audioPacketsSent = 0;
     private long audioPacketsReceived = 0;
@@ -53,15 +57,16 @@ public class Page1AppelController implements Initializable {
         // Démarrer la sonnerie d'appel
         demarrerSonnerie();
 
+        // PHASE 1: Démarrer seulement la réception pour recevoir le signal READY
         threadReception = new Thread(this::recevoir);
         threadReception.setName("AudioReceiver");
         threadReception.start();
 
         try {
             Page1Controller.out_audio.writeUTF(MainPageController.adressre_recepteur_audio);
-            micro = (TargetDataLine) AudioSystem.getLine(info);
 
-            // CRUCIAL: Pas de buffer spécifié pour éviter la latence
+            // Initialiser le microphone
+            micro = (TargetDataLine) AudioSystem.getLine(info);
             micro.open(format);
             micro.start();
 
@@ -74,32 +79,72 @@ public class Page1AppelController implements Initializable {
             return;
         }
 
-        threadEmission = new Thread(() -> {
-            byte[] buffer = new byte[1024];
-            logger.fine("Démarrage émission audio");
+        // PHASE 2: Gérer la synchronisation
+        new Thread(this::synchronizeStart).start();
+    }
 
-            while (encours && !Thread.currentThread().isInterrupted()) {
-                int bytesRead = micro.read(buffer, 0, buffer.length);
-                try {
-                    // SIMPLE et DIRECT - pas de synchronized ni flush
-                    Page1Controller.out_audio.write(buffer, 0, bytesRead);
-                    audioPacketsSent++;
-                } catch (IOException e) {
-                    if (encours) {
-                        logger.log(Level.WARNING, "Erreur émission audio", e);
-                    }
-                    encours = false;
-                    appelEnCours = false;
-                    arreterSonnerie();
-                    Platform.runLater(this::fermerFenetre);
-                    break;
-                }
+    private void synchronizeStart() {
+        try {
+            // Attendre un peu pour s'assurer que tout est initialisé
+            Thread.sleep(500);
+
+            // Envoyer notre signal READY
+            logger.info("Envoi du signal de synchronisation");
+            Page1Controller.out_audio.writeUTF("READY_SIGNAL");
+
+            readyToStart = true;
+
+            // Attendre que l'autre soit prêt (max 10 secondes)
+            int attempts = 0;
+            while (!otherPersonReady && encours && attempts < 100) {
+                Thread.sleep(100);
+                attempts++;
             }
-            logger.fine("Arrêt émission audio - paquets envoyés: " + audioPacketsSent);
-        });
-        threadEmission.setName("AudioSender");
-        threadEmission.setDaemon(true);
-        threadEmission.start();
+
+            if (!otherPersonReady) {
+                logger.warning("Timeout synchronisation - démarrage forcé");
+            } else {
+                logger.info("Synchronisation réussie - démarrage ensemble");
+            }
+
+            // PHASE 3: Les deux sont prêts, démarrer l'émission
+            threadEmission = new Thread(this::emettre);
+            threadEmission.setName("AudioSender");
+            threadEmission.setPriority(Thread.MAX_PRIORITY);
+            threadEmission.setDaemon(true);
+            threadEmission.start();
+
+        } catch (IOException | InterruptedException e) {
+            logger.log(Level.SEVERE, "Erreur synchronisation", e);
+            encours = false;
+            appelEnCours = false;
+            arreterSonnerie();
+            Platform.runLater(this::fermerFenetre);
+        }
+    }
+
+    private void emettre() {
+        byte[] buffer = new byte[1024];
+        logger.info("Démarrage émission audio synchronisée");
+
+        while (encours && !Thread.currentThread().isInterrupted()) {
+            int bytesRead = micro.read(buffer, 0, buffer.length);
+            try {
+                // SIMPLE et DIRECT - pas de synchronized ni flush
+                Page1Controller.out_audio.write(buffer, 0, bytesRead);
+                audioPacketsSent++;
+            } catch (IOException e) {
+                if (encours) {
+                    logger.log(Level.WARNING, "Erreur émission audio", e);
+                }
+                encours = false;
+                appelEnCours = false;
+                arreterSonnerie();
+                Platform.runLater(this::fermerFenetre);
+                break;
+            }
+        }
+        logger.fine("Arrêt émission audio - paquets envoyés: " + audioPacketsSent);
     }
 
     private void demarrerSonnerie() {
@@ -151,19 +196,20 @@ public class Page1AppelController implements Initializable {
             line.start();
 
             while (appelEnCours && !Thread.currentThread().isInterrupted()) {
-                // Générer un bip de 800Hz pendant 0.5 seconde
+                // Générer pattern de sonnerie : 2 bips + pause
                 byte[] bipData = genererBip(800, 0.5, formatBip);
-                line.write(bipData, 0, bipData.length);
 
-                // Pause de 1 seconde
-                if (appelEnCours && !Thread.currentThread().isInterrupted()) {
-                    Thread.sleep(500);
-                }
+                // Premier bip
+                line.write(bipData, 0, bipData.length);
+                if (!appelEnCours) break;
+                Thread.sleep(150);
 
                 // Deuxième bip
                 line.write(bipData, 0, bipData.length);
+                if (!appelEnCours) break;
+                Thread.sleep(300);
 
-                // Pause plus longue entre les cycles
+                // Pause longue
                 if (appelEnCours && !Thread.currentThread().isInterrupted()) {
                     Thread.sleep(500);
                 }
@@ -178,13 +224,12 @@ public class Page1AppelController implements Initializable {
 
     private byte[] genererBip(int frequence, double duree, AudioFormat format) {
         int numSamples = (int) (duree * format.getSampleRate());
-        byte[] buffer = new byte[numSamples * 2]; // 16 bits = 2 bytes
+        byte[] buffer = new byte[numSamples * 2];
 
         for (int i = 0; i < numSamples; i++) {
             double angle = 2.0 * Math.PI * i * frequence / format.getSampleRate();
             short sample = (short) (Math.sin(angle) * 32767 * 0.3); // Volume à 30%
 
-            // Conversion en little-endian
             buffer[i * 2] = (byte) (sample & 0xFF);
             buffer[i * 2 + 1] = (byte) ((sample >> 8) & 0xFF);
         }
@@ -249,6 +294,15 @@ public class Page1AppelController implements Initializable {
                 try {
                     int byte_lue = Page1Controller.in_audio.read(buffer);
                     if (byte_lue > 0) {
+
+                        // VÉRIFIER SIGNAL DE SYNCHRONISATION
+                        String received = new String(buffer, 0, Math.min(byte_lue, 12));
+                        if (received.startsWith("READY_SIGNAL")) {
+                            otherPersonReady = true;
+                            logger.info("Signal de synchronisation reçu !");
+                            continue;
+                        }
+
                         sortie_audio.write(buffer, 0, byte_lue);
                         audioPacketsReceived++;
 
@@ -259,7 +313,7 @@ public class Page1AppelController implements Initializable {
                             threadTimer.start();
 
                             // CRUCIAL: Timeout court pour détecter déconnexions rapidement
-                            Page1Controller.socket_audio.setSoTimeout(500);
+                            Page1Controller.socket_audio.setSoTimeout(2000);
                             logger.info("Communication établie - timeout configuré");
                         }
                     }

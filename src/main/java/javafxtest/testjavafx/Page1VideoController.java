@@ -42,10 +42,15 @@ public class Page1VideoController implements Initializable {
     private static TargetDataLine micro;
     private Stage stage;
 
+    // VARIABLES DE SYNCHRONISATION
+    private volatile boolean readyToStart = false;
+    private volatile boolean otherPersonReady = false;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         encours = true;
-        message_connexion.setVisible(false);
+        message_connexion.setText("Connexion en cours...");
+        message_connexion.setVisible(true);
         Platform.runLater(() -> stage = (Stage) vbox1.getScene().getWindow());
 
         try {
@@ -63,19 +68,78 @@ public class Page1VideoController implements Initializable {
             return;
         }
 
-        // Démarrer les threads comme l'audio simple
-        threadSendVideo = new Thread(this::sendVideo);
+        // Initialiser l'audio
+        try {
+            micro = AudioSystem.getTargetDataLine(format);
+            micro.open(format);
+            micro.start();
+        } catch (LineUnavailableException e) {
+            encours = false;
+            stopAndClose();
+            return;
+        }
+
+        // PHASE 1: Démarrer les threads de réception (pour recevoir le signal READY)
         threadReceiveVideo = new Thread(this::receiveVideo);
-        threadSendAudio = new Thread(this::sendAudio);
         threadReceiveAudio = new Thread(this::receiveAudio);
-
-        threadReceiveAudio.setPriority(Thread.MAX_PRIORITY);
-        threadSendAudio.setPriority(Thread.MAX_PRIORITY);
-
-        threadSendVideo.start();
         threadReceiveVideo.start();
-        threadSendAudio.start();
         threadReceiveAudio.start();
+
+        // PHASE 2: Envoyer notre signal READY et attendre l'autre
+        new Thread(this::synchronizeStart).start();
+    }
+
+    private void synchronizeStart() {
+        try {
+            // Attendre un peu pour s'assurer que tout est initialisé
+            Thread.sleep(500);
+
+            // Envoyer notre signal READY
+            Platform.runLater(() -> message_connexion.setText("Envoi signal de synchronisation..."));
+
+            Page1Controller.out_audio.writeUTF("READY_SIGNAL");
+            Page1Controller.out_video.writeInt(-1); // Signal spécial pour "READY"
+
+            readyToStart = true;
+            Platform.runLater(() -> message_connexion.setText("En attente de l'autre personne..."));
+
+            // Attendre que l'autre soit prêt (max 10 secondes)
+            int attempts = 0;
+            while (!otherPersonReady && encours && attempts < 100) {
+                Thread.sleep(100);
+                attempts++;
+            }
+
+            if (!otherPersonReady) {
+                Platform.runLater(() -> message_connexion.setText("Timeout - démarrage forcé"));
+                Thread.sleep(1000);
+            }
+
+            // PHASE 3: Les deux sont prêts, démarrer l'envoi
+            Platform.runLater(() -> {
+                message_connexion.setText("Synchronisé - démarrage...");
+                // Cacher le message après 2 secondes
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(2000);
+                        Platform.runLater(() -> message_connexion.setVisible(false));
+                    } catch (InterruptedException e) {}
+                }).start();
+            });
+
+            // Démarrer les threads d'envoi ENSEMBLE
+            threadSendVideo = new Thread(this::sendVideo);
+            threadSendAudio = new Thread(this::sendAudio);
+
+            threadSendAudio.setPriority(Thread.MAX_PRIORITY);
+
+            threadSendVideo.start();
+            threadSendAudio.start();
+
+        } catch (IOException | InterruptedException e) {
+            encours = false;
+            Platform.runLater(this::stopAndClose);
+        }
     }
 
     private void sendVideo() {
@@ -111,6 +175,14 @@ public class Page1VideoController implements Initializable {
         while (encours && !Thread.currentThread().isInterrupted()) {
             try {
                 int length = Page1Controller.in_video.readInt();
+
+                // VÉRIFIER SIGNAL DE SYNCHRONISATION
+                if (length == -1) {
+                    otherPersonReady = true;
+                    Platform.runLater(() -> message_connexion.setText("L'autre personne est prête !"));
+                    continue;
+                }
+
                 byte[] data = new byte[length];
                 Page1Controller.in_video.readFully(data);
 
@@ -127,45 +199,40 @@ public class Page1VideoController implements Initializable {
     }
 
     private void sendAudio() {
-        try {
-            micro = AudioSystem.getTargetDataLine(format);
-            micro.open(format); // PAS de buffer
-            micro.start();
-
-            byte[] buffer = new byte[1024];
-            while (encours && !Thread.currentThread().isInterrupted()) {
-                int bytesRead = micro.read(buffer, 0, buffer.length);
-                try {
-                    Page1Controller.out_audio.write(buffer, 0, bytesRead); // SIMPLE
-                } catch (IOException e) {
-                    encours = false;
-                    Platform.runLater(this::stopAndClose);
-                    break;
-                }
-            }
-        } catch (LineUnavailableException  e) {
-            encours = false;
-            Platform.runLater(this::stopAndClose);
-        } finally {
-            if (micro != null) {
-                micro.stop();
-                micro.close();
+        byte[] buffer = new byte[1024];
+        while (encours && !Thread.currentThread().isInterrupted()) {
+            int bytesRead = micro.read(buffer, 0, buffer.length);
+            try {
+                Page1Controller.out_audio.write(buffer, 0, bytesRead);
+            } catch (IOException e) {
+                encours = false;
+                Platform.runLater(this::stopAndClose);
+                break;
             }
         }
     }
 
     private void receiveAudio() {
         try (SourceDataLine speaker = AudioSystem.getSourceDataLine(format)) {
-            speaker.open(format); // PAS de buffer
+            speaker.open(format);
             speaker.start();
             byte[] buffer = new byte[1024];
 
             while (encours && !Thread.currentThread().isInterrupted()) {
                 try {
                     int bytesRead = Page1Controller.in_audio.read(buffer);
+
+                    // VÉRIFIER SIGNAL DE SYNCHRONISATION AUDIO
+                    String received = new String(buffer, 0, Math.min(bytesRead, 12));
+                    if (received.startsWith("READY_SIGNAL")) {
+                        otherPersonReady = true;
+                        Platform.runLater(() -> message_connexion.setText("Signal reçu !"));
+                        continue;
+                    }
+
                     speaker.write(buffer, 0, bytesRead);
 
-                    // Configurer timeout SEULEMENT après la première réception
+                    // Configurer timeout après première vraie réception audio
                     if (Page1Controller.socket_audio.getSoTimeout() == 0) {
                         Page1Controller.socket_audio.setSoTimeout(2000);
                     }
