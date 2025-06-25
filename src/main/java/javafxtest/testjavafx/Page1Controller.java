@@ -223,6 +223,11 @@ public class Page1Controller implements Initializable {
         Stage stage = new Stage();
         stage.setTitle("MonApp");
         stage.setScene(scene);
+        stage.setResizable(false);
+        // BLOQUER LE BOUTON FERMER
+        stage.setOnCloseRequest(event -> {
+            event.consume(); // Empêche la fermeture
+        });
         stage.show();
     }
 
@@ -597,6 +602,11 @@ public class Page1Controller implements Initializable {
                             Stage stage = new Stage();
                             stage.setTitle("MonApp");
                             stage.setScene(scene);
+                            stage.setResizable(false);
+                            // BLOQUER LE BOUTON FERMER
+                            stage.setOnCloseRequest(event -> {
+                                event.consume(); // Empêche la fermeture
+                            });
                             stage.show();
                         } catch (IOException e) {
                             Alert alert1 = new Alert(Alert.AlertType.INFORMATION);
@@ -696,6 +706,11 @@ public class Page1Controller implements Initializable {
                             Stage stage = new Stage();
                             stage.setTitle("MonApp");
                             stage.setScene(scene);
+                            stage.setResizable(false);
+                            // BLOQUER LE BOUTON FERMER
+                            stage.setOnCloseRequest(event -> {
+                                event.consume(); // Empêche la fermeture
+                            });
                             stage.show();
                         } catch (IOException e) {
                             Alert alert1 = new Alert(Alert.AlertType.INFORMATION);
@@ -913,6 +928,11 @@ public class Page1Controller implements Initializable {
             Stage stage = new Stage();
             stage.setTitle("MonApp");
             stage.setScene(scene);
+            stage.setResizable(false);
+            // BLOQUER LE BOUTON FERMER
+            stage.setOnCloseRequest(event -> {
+                event.consume(); // Empêche la fermeture
+            });
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
