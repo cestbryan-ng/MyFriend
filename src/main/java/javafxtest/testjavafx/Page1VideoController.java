@@ -163,11 +163,21 @@ public class Page1VideoController implements Initializable {
             while (encours && !Thread.currentThread().isInterrupted()) {
                 try {
                     int bytesRead = Page1Controller.in_audio.read(buffer);
-                    speaker.write(buffer, 0, bytesRead);
+                    if (bytesRead > 0) {
+                        // CORRECTION: S'assurer qu'on a un nombre pair de bytes
+                        int bytesToWrite = bytesRead;
+                        if (bytesToWrite % 2 != 0) {
+                            bytesToWrite--; // Réduire d'un byte pour avoir un nombre pair
+                        }
 
-                    // Configurer timeout SEULEMENT après la première réception
-                    if (Page1Controller.socket_audio.getSoTimeout() == 0) {
-                        Page1Controller.socket_audio.setSoTimeout(2000);
+                        if (bytesToWrite > 0) {
+                            speaker.write(buffer, 0, bytesToWrite);
+                        }
+
+                        // Configurer timeout après première réception
+                        if (Page1Controller.socket_audio.getSoTimeout() == 0) {
+                            Page1Controller.socket_audio.setSoTimeout(2000);
+                        }
                     }
                 } catch (SocketTimeoutException e) {
                     encours = false;

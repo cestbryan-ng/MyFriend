@@ -249,17 +249,23 @@ public class Page1AppelController implements Initializable {
                 try {
                     int byte_lue = Page1Controller.in_audio.read(buffer);
                     if (byte_lue > 0) {
-                        sortie_audio.write(buffer, 0, byte_lue);
-                        audioPacketsReceived++;
+                        // CORRECTION: S'assurer qu'on a un nombre pair de bytes
+                        int bytesToWrite = byte_lue;
+                        if (bytesToWrite % 2 != 0) {
+                            bytesToWrite--; // Réduire d'un byte pour avoir un nombre pair
+                        }
+
+                        if (bytesToWrite > 0) {
+                            sortie_audio.write(buffer, 0, bytesToWrite);
+                            audioPacketsReceived++;
+                        }
 
                         if (!(threadTimer.isAlive())) {
                             // L'autre personne a décroché, arrêter la sonnerie
                             appelEnCours = false;
                             arreterSonnerie();
                             threadTimer.start();
-
-                            // CRUCIAL: Timeout court pour détecter déconnexions rapidement
-                            Page1Controller.socket_audio.setSoTimeout(500);
+                            Page1Controller.socket_audio.setSoTimeout(2000);
                             logger.info("Communication établie - timeout configuré");
                         }
                     }
