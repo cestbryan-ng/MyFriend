@@ -3,6 +3,7 @@ package javafxtest.testjavafx;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
@@ -14,6 +15,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import java.io.IOException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -22,8 +24,9 @@ import java.net.Socket;
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
 import java.net.Inet4Address;
+import java.util.ResourceBundle;
 
-public class MainPageController {
+public class MainPageController implements Initializable {
     static final String ADRESSE_SERVEUR = "192.168.1.101";
     static Socket socket;
     static DataOutputStream out;
@@ -49,6 +52,22 @@ public class MainPageController {
 
     @FXML
     private AnchorPane anchorpane1;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        // AJOUTER CES LIGNES POUR LA TOUCHE ENTRÉE
+        nom_utilisateur.setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                Connexion(new ActionEvent());
+            }
+        });
+
+        mot_de_passe_utilisateur.setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                Connexion(new ActionEvent());
+            }
+        });
+    }
 
     @FXML
     void Connexion(ActionEvent event) {

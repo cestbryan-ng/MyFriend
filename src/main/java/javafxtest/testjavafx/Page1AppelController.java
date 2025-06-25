@@ -151,21 +151,26 @@ public class Page1AppelController implements Initializable {
             line.start();
 
             while (appelEnCours && !Thread.currentThread().isInterrupted()) {
+                // Vérifier appelEnCours plus fréquemment
+                if (!appelEnCours) break;
+
                 // Générer un bip de 800Hz pendant 0.5 seconde
-                byte[] bipData = genererBip(800, 0.5, formatBip);
+                byte[] bipData = genererBip(800, 0.3, formatBip); // Durée réduite
                 line.write(bipData, 0, bipData.length);
 
-                // Pause de 1 seconde
-                if (appelEnCours && !Thread.currentThread().isInterrupted()) {
-                    Thread.sleep(500);
+                // Vérifications fréquentes pendant les pauses
+                for (int i = 0; i < 10 && appelEnCours && !Thread.currentThread().isInterrupted(); i++) {
+                    Thread.sleep(30); // 10 x 30ms = 300ms total
                 }
+
+                if (!appelEnCours) break;
 
                 // Deuxième bip
                 line.write(bipData, 0, bipData.length);
 
-                // Pause plus longue entre les cycles
-                if (appelEnCours && !Thread.currentThread().isInterrupted()) {
-                    Thread.sleep(500);
+                // Pause plus longue avec vérifications fréquentes
+                for (int i = 0; i < 15 && appelEnCours && !Thread.currentThread().isInterrupted(); i++) {
+                    Thread.sleep(35); // 15 x 35ms = 525ms total
                 }
             }
 
@@ -195,16 +200,26 @@ public class Page1AppelController implements Initializable {
     private void arreterSonnerie() {
         appelEnCours = false;
 
-        if (threadSonnerie != null) {
+        if (threadSonnerie != null && threadSonnerie.isAlive()) {
             threadSonnerie.interrupt();
+            try {
+                threadSonnerie.join(500); // Attendre max 500ms que le thread s'arrête
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
 
-        if (sonnerieClip != null && sonnerieClip.isRunning()) {
-            sonnerieClip.stop();
-            sonnerieClip.close();
+        if (sonnerieClip != null) {
+            if (sonnerieClip.isRunning()) {
+                sonnerieClip.stop();
+            }
+            if (sonnerieClip.isOpen()) {
+                sonnerieClip.close();
+            }
+            sonnerieClip = null;
         }
 
-        logger.fine("Sonnerie arrêtée");
+        logger.fine("Sonnerie arrêtée définitivement");
     }
 
     @FXML
@@ -238,17 +253,33 @@ public class Page1AppelController implements Initializable {
         threadTimer.setDaemon(true);
 
         try (SourceDataLine sortie_audio = AudioSystem.getSourceDataLine(format)) {
-            // CRUCIAL: Pas de buffer spécifié pour éviter la latence
             sortie_audio.open(format);
             sortie_audio.start();
             byte[] buffer = new byte[1024];
 
             logger.info("Démarrage réception audio");
+            boolean premierePaquetRecu = false; // NOUVEAU FLAG
 
             while (encours && !Thread.currentThread().isInterrupted()) {
                 try {
                     int byte_lue = Page1Controller.in_audio.read(buffer);
                     if (byte_lue > 0) {
+                        // ARRÊTER LA SONNERIE DÈS LE PREMIER PAQUET REÇU
+                        if (!premierePaquetRecu) {
+                            premierePaquetRecu = true;
+                            appelEnCours = false;  // Arrêter la sonnerie IMMÉDIATEMENT
+                            arreterSonnerie();
+
+                            // Démarrer le timer seulement maintenant
+                            if (!threadTimer.isAlive()) {
+                                threadTimer.start();
+                            }
+
+                            // Configurer timeout après première réception
+                            Page1Controller.socket_audio.setSoTimeout(500);
+                            logger.info("Communication établie - sonnerie arrêtée");
+                        }
+
                         // CORRECTION: S'assurer qu'on a un nombre pair de bytes
                         int bytesToWrite = byte_lue;
                         if (bytesToWrite % 2 != 0) {
@@ -258,15 +289,6 @@ public class Page1AppelController implements Initializable {
                         if (bytesToWrite > 0) {
                             sortie_audio.write(buffer, 0, bytesToWrite);
                             audioPacketsReceived++;
-                        }
-
-                        if (!(threadTimer.isAlive())) {
-                            // L'autre personne a décroché, arrêter la sonnerie
-                            appelEnCours = false;
-                            arreterSonnerie();
-                            threadTimer.start();
-                            Page1Controller.socket_audio.setSoTimeout(2000);
-                            logger.info("Communication établie - timeout configuré");
                         }
                     }
                 } catch (SocketTimeoutException e) {

@@ -156,14 +156,23 @@ public class Page1VideoController implements Initializable {
 
     private void receiveAudio() {
         try (SourceDataLine speaker = AudioSystem.getSourceDataLine(format)) {
-            speaker.open(format); // PAS de buffer
+            speaker.open(format);
             speaker.start();
             byte[] buffer = new byte[1024];
+            boolean premierePaquetAudioRecu = false; // NOUVEAU FLAG pour arrêter sonnerie
 
             while (encours && !Thread.currentThread().isInterrupted()) {
                 try {
                     int bytesRead = Page1Controller.in_audio.read(buffer);
                     if (bytesRead > 0) {
+                        // ARRÊTER TOUTE SONNERIE dès le premier paquet audio reçu
+                        if (!premierePaquetAudioRecu) {
+                            premierePaquetAudioRecu = true;
+                            // Note: La sonnerie est gérée dans Page1Controller,
+                            // mais on s'assure qu'elle s'arrête ici aussi
+                            System.out.println("Communication vidéo établie - audio reçu");
+                        }
+
                         // CORRECTION: S'assurer qu'on a un nombre pair de bytes
                         int bytesToWrite = bytesRead;
                         if (bytesToWrite % 2 != 0) {

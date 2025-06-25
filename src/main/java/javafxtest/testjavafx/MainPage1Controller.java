@@ -3,6 +3,7 @@ package javafxtest.testjavafx;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
@@ -12,10 +13,11 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.net.URL;
 import java.sql.*;
 import java.util.*;
 
-public class MainPage1Controller {
+public class MainPage1Controller implements Initializable {
 
     @FXML
     private AnchorPane anchorpane1;
@@ -40,6 +42,40 @@ public class MainPage1Controller {
 
     @FXML
     private TextField photo_profil;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        // AJOUTER CES LIGNES POUR LA TOUCHE ENTRÉE
+        nom_utilisateur.setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                Inscrire(new ActionEvent());
+            }
+        });
+
+        mot_de_passe_utilisateur1.setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                Inscrire(new ActionEvent());
+            }
+        });
+
+        mot_de_passe_utilisateur2.setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                Inscrire(new ActionEvent());
+            }
+        });
+
+        numero_tel.setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                Inscrire(new ActionEvent());
+            }
+        });
+
+        photo_profil.setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                Inscrire(new ActionEvent());
+            }
+        });
+    }
 
 
     @FXML

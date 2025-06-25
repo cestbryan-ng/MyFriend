@@ -524,70 +524,77 @@ public class Page1Controller implements Initializable {
                 Platform.runLater(() -> {
                     // Variables pour la sonnerie
                     final boolean[] sonnerieActive = {true};
-                    Thread threadSonnerie = null;
-                    Clip sonnerieClip = null;
+                    final Thread[] threadSonnerie = {null}; // Utiliser un tableau pour pouvoir modifier depuis les lambdas
 
                     try {
-                        // Démarrer la sonnerie avant d'afficher l'alerte
-                        threadSonnerie = new Thread(() -> {
+                        // Démarrer la sonnerie
+                        threadSonnerie[0] = new Thread(() -> {
                             try {
-                                // Essayer de charger un fichier de sonnerie
                                 URL sonnerieUrl = getClass().getResource("telephone-ring-0.wav");
                                 if (sonnerieUrl != null) {
                                     AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(sonnerieUrl);
                                     Clip clip = AudioSystem.getClip();
                                     clip.open(audioInputStream);
 
-                                    // Jouer en boucle tant que la sonnerie est active
                                     while (sonnerieActive[0] && !Thread.currentThread().isInterrupted()) {
+                                        if (!sonnerieActive[0]) break; // Vérification supplémentaire
+
                                         clip.setFramePosition(0);
                                         clip.start();
 
+                                        // Vérifier sonnerieActive plus fréquemment
                                         while (clip.isRunning() && sonnerieActive[0] && !Thread.currentThread().isInterrupted()) {
-                                            Thread.sleep(100);
+                                            Thread.sleep(50); // Vérification toutes les 50ms
                                         }
 
                                         if (sonnerieActive[0] && !Thread.currentThread().isInterrupted()) {
-                                            Thread.sleep(300);
+                                            Thread.sleep(200); // Pause réduite entre sonneries
                                         }
                                     }
                                     clip.close();
                                 } else {
-                                    // Sonnerie générée si pas de fichier
-                                    genererSonnerieSimple(sonnerieActive);
+                                    genererSonnerieSimpleReactive(sonnerieActive);
                                 }
                             } catch (Exception e) {
-                                // En cas d'erreur, utiliser la sonnerie simple
-                                genererSonnerieSimple(sonnerieActive);
+                                genererSonnerieSimpleReactive(sonnerieActive);
                             }
                         });
-                        threadSonnerie.setDaemon(true);
-                        threadSonnerie.start();
+                        threadSonnerie[0].setDaemon(true);
+                        threadSonnerie[0].start();
 
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
 
-                    // Créer et afficher l'alerte
+                    // Créer l'alerte
                     Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                     alert.setHeaderText(nom_recepteur + " vous appelle");
                     alert.setContentText("Appuyer sur OK pour décrocher");
 
-                    // Gérer la fermeture de la fenêtre d'alerte
-                    final Thread finalThreadSonnerie = threadSonnerie;
+                    // Arrêter la sonnerie quand l'alerte se ferme
                     alert.setOnCloseRequest(event -> {
                         sonnerieActive[0] = false;
-                        if (finalThreadSonnerie != null) {
-                            finalThreadSonnerie.interrupt();
+                        if (threadSonnerie[0] != null) {
+                            threadSonnerie[0].interrupt();
+                            try {
+                                threadSonnerie[0].join(300); // Attendre max 300ms
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            }
                         }
                     });
 
                     Optional<ButtonType> result = alert.showAndWait();
 
-                    // Arrêter la sonnerie dès que l'utilisateur répond
+                    // ARRÊTER LA SONNERIE IMMÉDIATEMENT après la réponse
                     sonnerieActive[0] = false;
-                    if (finalThreadSonnerie != null) {
-                        finalThreadSonnerie.interrupt();
+                    if (threadSonnerie[0] != null) {
+                        threadSonnerie[0].interrupt();
+                        try {
+                            threadSonnerie[0].join(300);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
                     }
 
                     if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -603,9 +610,8 @@ public class Page1Controller implements Initializable {
                             stage.setTitle("MonApp");
                             stage.setScene(scene);
                             stage.setResizable(false);
-                            // BLOQUER LE BOUTON FERMER
                             stage.setOnCloseRequest(event -> {
-                                event.consume(); // Empêche la fermeture
+                                event.consume();
                             });
                             stage.show();
                         } catch (IOException e) {
@@ -616,100 +622,101 @@ public class Page1Controller implements Initializable {
                         }
                     }
                 });
-            } else {
+            } else if (type_envoie.equals("audio")) {
                 MainPageController.recepteur_audio = nom_recepteur;
                 MainPageController.adressre_recepteur_audio = adresse_recepteur;
-                MainPageController.recepteur_video = nom_recepteur;
-                MainPageController.adresse_recepteur_video = adresse_recepteur;
 
                 Platform.runLater(() -> {
                     // Variables pour la sonnerie
                     final boolean[] sonnerieActive = {true};
-                    Thread threadSonnerie = null;
+                    final Thread[] threadSonnerie = {null}; // Utiliser un tableau pour pouvoir modifier depuis les lambdas
 
                     try {
-                        // Démarrer la sonnerie avant d'afficher l'alerte
-                        threadSonnerie = new Thread(() -> {
+                        // Démarrer la sonnerie
+                        threadSonnerie[0] = new Thread(() -> {
                             try {
-                                // Essayer de charger le même fichier de sonnerie que pour l'audio
                                 URL sonnerieUrl = getClass().getResource("telephone-ring-0.wav");
                                 if (sonnerieUrl != null) {
                                     AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(sonnerieUrl);
                                     Clip clip = AudioSystem.getClip();
                                     clip.open(audioInputStream);
 
-                                    // Jouer en boucle tant que la sonnerie est active
                                     while (sonnerieActive[0] && !Thread.currentThread().isInterrupted()) {
+                                        if (!sonnerieActive[0]) break; // Vérification supplémentaire
+
                                         clip.setFramePosition(0);
                                         clip.start();
 
+                                        // Vérifier sonnerieActive plus fréquemment
                                         while (clip.isRunning() && sonnerieActive[0] && !Thread.currentThread().isInterrupted()) {
-                                            Thread.sleep(100);
+                                            Thread.sleep(50); // Vérification toutes les 50ms
                                         }
 
                                         if (sonnerieActive[0] && !Thread.currentThread().isInterrupted()) {
-                                            Thread.sleep(300);
+                                            Thread.sleep(200); // Pause réduite entre sonneries
                                         }
                                     }
                                     clip.close();
                                 } else {
-                                    // Même sonnerie générée que pour l'audio
-                                    genererSonnerieSimple(sonnerieActive);
+                                    genererSonnerieSimpleReactive(sonnerieActive);
                                 }
                             } catch (Exception e) {
-                                // En cas d'erreur, utiliser la même sonnerie que pour l'audio
-                                genererSonnerieSimple(sonnerieActive);
+                                genererSonnerieSimpleReactive(sonnerieActive);
                             }
                         });
-                        threadSonnerie.setDaemon(true);
-                        threadSonnerie.start();
+                        threadSonnerie[0].setDaemon(true);
+                        threadSonnerie[0].start();
 
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
 
-                    // Créer et afficher l'alerte
+                    // Créer l'alerte
                     Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                    alert.setHeaderText(nom_recepteur + " vous appelle en video");
-                    alert.setContentText("Appuyer sur OK pour décrocher (Appel vidéo)");
+                    alert.setHeaderText(nom_recepteur + " vous appelle");
+                    alert.setContentText("Appuyer sur OK pour décrocher");
 
-                    // Gérer la fermeture de la fenêtre d'alerte
-                    final Thread finalThreadSonnerie = threadSonnerie;
+                    // Arrêter la sonnerie quand l'alerte se ferme
                     alert.setOnCloseRequest(event -> {
                         sonnerieActive[0] = false;
-                        if (finalThreadSonnerie != null) {
-                            finalThreadSonnerie.interrupt();
+                        if (threadSonnerie[0] != null) {
+                            threadSonnerie[0].interrupt();
+                            try {
+                                threadSonnerie[0].join(300); // Attendre max 300ms
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            }
                         }
                     });
 
                     Optional<ButtonType> result = alert.showAndWait();
 
-                    // Arrêter la sonnerie dès que l'utilisateur répond
+                    // ARRÊTER LA SONNERIE IMMÉDIATEMENT après la réponse
                     sonnerieActive[0] = false;
-                    if (finalThreadSonnerie != null) {
-                        finalThreadSonnerie.interrupt();
+                    if (threadSonnerie[0] != null) {
+                        threadSonnerie[0].interrupt();
+                        try {
+                            threadSonnerie[0].join(300);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
                     }
 
                     if (result.isPresent() && result.get() == ButtonType.OK) {
                         try {
-                            socket_video = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurVideo.NP_PORT);
-                            in_video = new DataInputStream(socket_video.getInputStream());
-                            out_video = new DataOutputStream(socket_video.getOutputStream());
-
                             socket_audio = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
                             in_audio = new DataInputStream(socket_audio.getInputStream());
                             out_audio = new DataOutputStream(socket_audio.getOutputStream());
 
-                            FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("Page1Video.fxml"));
-                            Scene scene = new Scene(fxmlLoader.load(), 930, 410);
-                            scene.getStylesheets().add(getClass().getResource("Page1VideoUI.css").toExternalForm());
+                            FXMLLoader fxmlLoader = new FXMLLoader(MainPage.class.getResource("Page1Appel.fxml"));
+                            Scene scene = new Scene(fxmlLoader.load(), 196, 330);
+                            scene.getStylesheets().add(getClass().getResource("Page1Appel.css").toExternalForm());
                             Stage stage = new Stage();
                             stage.setTitle("MonApp");
                             stage.setScene(scene);
                             stage.setResizable(false);
-                            // BLOQUER LE BOUTON FERMER
                             stage.setOnCloseRequest(event -> {
-                                event.consume(); // Empêche la fermeture
+                                event.consume();
                             });
                             stage.show();
                         } catch (IOException e) {
@@ -1284,6 +1291,46 @@ public class Page1Controller implements Initializable {
         }
 
         return buffer;
+    }
+
+    private void genererSonnerieSimpleReactive(boolean[] sonnerieActive) {
+        try {
+            AudioFormat format = new AudioFormat(44100, 16, 1, true, false);
+            SourceDataLine line = AudioSystem.getSourceDataLine(format);
+            line.open(format);
+            line.start();
+
+            while (sonnerieActive[0] && !Thread.currentThread().isInterrupted()) {
+                // Vérification fréquente
+                if (!sonnerieActive[0]) break;
+
+                // Pattern de sonnerie : 2 bips rapides + pause
+                byte[] bip = genererBipSimple(950, 0.3, format); // Durée réduite
+
+                // Premier bip
+                line.write(bip, 0, bip.length);
+
+                // Pause courte avec vérifications
+                for (int i = 0; i < 5 && sonnerieActive[0]; i++) {
+                    Thread.sleep(25); // 5 x 25ms = 125ms
+                }
+
+                if (!sonnerieActive[0]) break;
+
+                // Deuxième bip
+                line.write(bip, 0, bip.length);
+
+                // Pause longue avec vérifications fréquentes
+                for (int i = 0; i < 20 && sonnerieActive[0]; i++) {
+                    Thread.sleep(25); // 20 x 25ms = 500ms
+                }
+            }
+
+            line.drain();
+            line.close();
+        } catch (Exception e) {
+            // Ignorer les erreurs de sonnerie
+        }
     }
 
 }
