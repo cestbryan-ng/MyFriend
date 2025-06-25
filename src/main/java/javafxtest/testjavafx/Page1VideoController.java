@@ -395,9 +395,9 @@ public class Page1VideoController implements Initializable {
                     if (bytesRead > 0) {
                         speaker.write(buffer, 0, bytesRead);
 
-                        // CORRECTION 4: Configurer timeout après première réception (comme dans l'appel audio)
+                        // CORRECTION 4: Configurer timeout après première réception (2s pour la vidéo)
                         if (!timeoutConfigured) {
-                            Page1Controller.socket_audio.setSoTimeout(500);
+                            Page1Controller.socket_audio.setSoTimeout(2000);
                             timeoutConfigured = true;
                         }
                     }
