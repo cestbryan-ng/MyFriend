@@ -10,7 +10,7 @@ import java.util.logging.Level;
 public class ServeurAudio {
     private static final Logger logger = Logger.getLogger(ServeurAudio.class.getName());
 
-    static final Integer NP_PORT = 5456;
+    static final Integer NP_PORT = 8081;
 
     static final List<DataOutputStream> clients = Collections.synchronizedList(new ArrayList<>());
     static final List<String> ip_client = Collections.synchronizedList(new ArrayList<>());

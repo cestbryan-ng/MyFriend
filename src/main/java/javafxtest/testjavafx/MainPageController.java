@@ -27,7 +27,7 @@ import java.net.Inet4Address;
 import java.util.ResourceBundle;
 
 public class MainPageController implements Initializable {
-    static final String ADRESSE_SERVEUR = "192.168.1.101";
+    static final String ADRESSE_SERVEUR = "a953a40d-d088-4fc2-9b65-d1965847c80e-00-8cpatqzy8vbh.spock.replit.dev";
     static Socket socket;
     static DataOutputStream out;
     static DataInputStream in;

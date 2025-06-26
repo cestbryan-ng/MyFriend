@@ -10,7 +10,7 @@ import java.util.logging.Level;
 public class ServeurVideo {
     private static final Logger logger = Logger.getLogger(ServeurVideo.class.getName());
 
-    static final Integer NP_PORT = 5455;
+    static final Integer NP_PORT = 8008;
 
     static final List<DataOutputStream> clients = Collections.synchronizedList(new ArrayList<>());
     static final List<String> ip_client = Collections.synchronizedList(new ArrayList<>());

@@ -11,9 +11,9 @@ public class BaseDeDonnee {
 
     static {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://192.168.1.101:3306/monapp");
-        config.setUsername("Jean_Roland");
-        config.setPassword("Papasenegal0");
+        config.setJdbcUrl("jdbc:mysql://yamabiko.proxy.rlwy.net:17088/railway");
+        config.setUsername("root");
+        config.setPassword("LtmzTbDYljnkvzhtOuHFyswIiuGBlyLb");
 
         config.setMaximumPoolSize(10);
         config.setMinimumIdle(2);

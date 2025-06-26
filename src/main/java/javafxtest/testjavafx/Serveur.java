@@ -6,7 +6,7 @@ import java.net.Socket;
 import java.util.*;
 
 public class Serveur {
-    static final Integer NP_PORT = 5454;
+    static final Integer NP_PORT = 8099;
 
     static final List<DataOutputStream> clients = Collections.synchronizedList(new ArrayList<>());
     static final List<String> ip_client = Collections.synchronizedList(new ArrayList<>());
