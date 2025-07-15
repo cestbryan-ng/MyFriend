@@ -50,6 +50,8 @@ public class Page1Controller implements Initializable {
     static Socket socket_audio;
     static DataInputStream in_audio;
     static DataOutputStream out_audio;
+    static String adresse_audio = "f93a92cb-2557-498e-84b7-24da48140d80-00-e5farjct9b20.worf.replit.dev";
+    static String adresse_video = "798c4594-e490-410f-8b47-76306130db76-00-1vbpii26ihkek.worf.replit.dev";
 
     @FXML
     private AnchorPane anchorpane1;
@@ -201,7 +203,7 @@ public class Page1Controller implements Initializable {
         }
 
         try {
-            socket_audio = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
+            socket_audio = new Socket(adresse_audio, ServeurAudio.NP_PORT);
             in_audio = new DataInputStream(socket_audio.getInputStream());
             out_audio = new DataOutputStream(socket_audio.getOutputStream());
 
@@ -599,7 +601,7 @@ public class Page1Controller implements Initializable {
 
                     if (result.isPresent() && result.get() == ButtonType.OK) {
                         try {
-                            socket_audio = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
+                            socket_audio = new Socket(adresse_audio, ServeurAudio.NP_PORT);
                             in_audio = new DataInputStream(socket_audio.getInputStream());
                             out_audio = new DataOutputStream(socket_audio.getOutputStream());
 
@@ -710,11 +712,11 @@ public class Page1Controller implements Initializable {
 
                     if (result.isPresent() && result.get() == ButtonType.OK) {
                         try {
-                            socket_video = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurVideo.NP_PORT);
+                            socket_video = new Socket(adresse_video, ServeurVideo.NP_PORT);
                             in_video = new DataInputStream(socket_video.getInputStream());
                             out_video = new DataOutputStream(socket_video.getOutputStream());
 
-                            socket_audio = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
+                            socket_audio = new Socket(adresse_audio, ServeurAudio.NP_PORT);
                             in_audio = new DataInputStream(socket_audio.getInputStream());
                             out_audio = new DataOutputStream(socket_audio.getOutputStream());
 
@@ -926,11 +928,11 @@ public class Page1Controller implements Initializable {
         MainPageController.recepteur_video = MainPageController.recepteur;
 
         try {
-            socket_video = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurVideo.NP_PORT);
+            socket_video = new Socket(adresse_video, ServeurVideo.NP_PORT);
             in_video = new DataInputStream(socket_video.getInputStream());
             out_video = new DataOutputStream(socket_video.getOutputStream());
 
-            socket_audio = new Socket(MainPageController.ADRESSE_SERVEUR, ServeurAudio.NP_PORT);
+            socket_audio = new Socket(adresse_audio, ServeurAudio.NP_PORT);
             in_audio = new DataInputStream(socket_audio.getInputStream());
             out_audio = new DataOutputStream(socket_audio.getOutputStream());
 
