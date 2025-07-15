@@ -27,7 +27,7 @@ import java.net.Inet4Address;
 import java.util.ResourceBundle;
 
 public class MainPageController implements Initializable {
-    static final String ADRESSE_SERVEUR = "192.168.1.101";
+    static final String ADRESSE_SERVEUR = "localhost";
     static Socket socket;
     static DataOutputStream out;
     static DataInputStream in;
@@ -55,7 +55,6 @@ public class MainPageController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // AJOUTER CES LIGNES POUR LA TOUCHE ENTRÉE
         nom_utilisateur.setOnKeyPressed(event -> {
             if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
                 Connexion(new ActionEvent());
