@@ -1,14 +1,12 @@
 package javafxtest.testjavafx;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
@@ -16,10 +14,7 @@ import javafx.stage.StageStyle;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.net.Socket;
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
@@ -27,7 +22,7 @@ import java.net.Inet4Address;
 import java.util.ResourceBundle;
 
 public class MainPageController implements Initializable {
-    static final String ADRESSE_SERVEUR = "localhost";
+    static final String ADRESSE_SERVEUR = "192.168.1.116";
     static Socket socket;
     static DataOutputStream out;
     static DataInputStream in;
@@ -53,6 +48,15 @@ public class MainPageController implements Initializable {
     @FXML
     private AnchorPane anchorpane1;
 
+    @FXML
+    private Button co;
+
+    @FXML
+    private Button ins;
+
+    @FXML
+    private ProgressIndicator loading;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         nom_utilisateur.setOnKeyPressed(event -> {
@@ -70,11 +74,22 @@ public class MainPageController implements Initializable {
 
     @FXML
     void Connexion(ActionEvent event) {
+        new Thread(() -> {
+            Platform.runLater(() -> {
+                loading.setVisible(true);
+                co.setVisible(false);
+                ins.setVisible(false);
+            });
+        }).start();
+
         nomutilisateur = nom_utilisateur.getText();
         String motdepasse = mot_de_passe_utilisateur.getText();
         message_erreur.setStyle("-fx-text-fill : red");
 
         if ((nomutilisateur.isEmpty()) || (motdepasse.isEmpty())) {
+            co.setVisible(true);
+            ins.setVisible(true);
+            loading.setVisible(false);
             message_erreur.setText("Entrer votre nom ou/et votre mot de passe");
             return;
         }
@@ -140,7 +155,6 @@ public class MainPageController implements Initializable {
                     return;
                 }
             }
-
             message_erreur.setText("Utilisateur ou Mot de passe incorrect");
 
         } catch (SQLException | IOException e) {
@@ -149,6 +163,10 @@ public class MainPageController implements Initializable {
             alert.setHeaderText("Echec de connexion");
             alert.setContentText("Nous n'avons pas pu vous connecter");
             alert.showAndWait();
+        } finally {
+            co.setVisible(true);
+            ins.setVisible(true);
+            loading.setVisible(false);
         }
     }
 
